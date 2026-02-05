@@ -6,6 +6,7 @@ use App\Entity\Enseignant;
 use App\Form\EnseignantType;
 use App\Repository\EnseignantRepository;
 use App\Service\AuthChecker;
+use App\Service\SearchService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,16 +16,41 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/enseignant')]
 class EnseignantController extends AbstractController
 {
-    #[Route('/', name: 'app_enseignant_index', methods: ['GET'])]
-    public function index(EnseignantRepository $enseignantRepository, AuthChecker $authChecker): Response
+    #[Route('/', name: 'app_enseignant_index', methods: ['GET', 'POST'])]
+    public function index(
+        EnseignantRepository $enseignantRepository,
+        AuthChecker $authChecker,
+        Request $request,
+        SearchService $searchService
+    ): Response
     {
         // Authentication check
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
         }
 
+        // Get search criteria from request
+        $criteria = [];
+        if ($request->getMethod() === 'POST') {
+            $criteria = $request->request->all();
+        } else {
+            $criteria = $request->query->all();
+        }
+
+        // Get filter options
+        $filterOptions = $searchService->getDistinctValues('enseignant', $enseignantRepository);
+
+        // Perform search if any criteria, otherwise get all
+        $enseignants = !empty(array_filter($criteria))
+            ? $searchService->searchEnseignants($criteria, $enseignantRepository)
+            : $enseignantRepository->findAll();
+
         return $this->render('enseignant/index.html.twig', [
-            'enseignants' => $enseignantRepository->findAll(),
+            'enseignants' => $enseignants,
+            'criteria' => $criteria,
+            'specialites' => $filterOptions['specialites'] ?? [],
+            'diplomes' => $filterOptions['diplomes'] ?? [],
+            'contrats' => $filterOptions['contrats'] ?? [],
         ]);
     }
 

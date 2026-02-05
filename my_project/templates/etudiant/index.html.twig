@@ -10,6 +10,101 @@
         </a>
     </div>
 
+    <!-- Simple Search Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-search"></i> Recherche et Filtrage</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ path('app_etudiant_index') }}">
+                <div class="row">
+                    <!-- Recherche globale -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Recherche globale</label>
+                        <input type="text"
+                               class="form-control"
+                               name="keyword"
+                               value="{{ criteria.keyword is defined ? criteria.keyword : '' }}"
+                               placeholder="Nom, prénom, email, matricule...">
+                    </div>
+
+                    <!-- Filtres -->
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Statut</label>
+                        <select class="form-select" name="statut">
+                            <option value="">Tous</option>
+                            <option value="actif" {{ (criteria.statut is defined and criteria.statut == 'actif') ? 'selected' : '' }}>Actif</option>
+                            <option value="inactif" {{ (criteria.statut is defined and criteria.statut == 'inactif') ? 'selected' : '' }}>Inactif</option>
+                            <option value="diplome" {{ (criteria.statut is defined and criteria.statut == 'diplome') ? 'selected' : '' }}>Diplômé</option>
+                            <option value="suspendu" {{ (criteria.statut is defined and criteria.statut == 'suspendu') ? 'selected' : '' }}>Suspendu</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Niveau d'étude</label>
+                        <select class="form-select" name="niveau">
+                            <option value="">Tous</option>
+                            {% for niveau in niveaux %}
+                                <option value="{{ niveau }}" {{ (criteria.niveau is defined and criteria.niveau == niveau) ? 'selected' : '' }}>
+                                    {{ niveau }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Spécialisation</label>
+                        <select class="form-select" name="specialisation">
+                            <option value="">Toutes</option>
+                            {% for specialisation in specialisations %}
+                                <option value="{{ specialisation }}" {{ (criteria.specialisation is defined and criteria.specialisation == specialisation) ? 'selected' : '' }}>
+                                    {{ specialisation }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Ligne 2 : Tri -->
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Trier par</label>
+                        <select class="form-select" name="sortBy">
+                            <option value="nom" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'nom' ? 'selected' : '' }}>Nom</option>
+                            <option value="prenom" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'prenom' ? 'selected' : '' }}>Prénom</option>
+                            <option value="email" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'email' ? 'selected' : '' }}>Email</option>
+                            <option value="matricule" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'matricule' ? 'selected' : '' }}>Matricule</option>
+                            <option value="niveau" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'niveau' ? 'selected' : '' }}>Niveau d'étude</option>
+                            <option value="specialisation" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'specialisation' ? 'selected' : '' }}>Spécialisation</option>
+                            <option value="dateInscription" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'dateInscription' ? 'selected' : '' }}>Date d'inscription</option>
+                            <option value="dateNaissance" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'dateNaissance' ? 'selected' : '' }}>Date de naissance</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Ordre</label>
+                        <select class="form-select" name="sortOrder">
+                            <option value="ASC" {{ (criteria.sortOrder is defined ? criteria.sortOrder : 'ASC') == 'ASC' ? 'selected' : '' }}>Croissant (A-Z)</option>
+                            <option value="DESC" {{ (criteria.sortOrder is defined ? criteria.sortOrder : 'ASC') == 'DESC' ? 'selected' : '' }}>Décroissant (Z-A)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3 d-flex align-items-end">
+                        <div class="btn-group w-100">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Appliquer les filtres
+                            </button>
+                            <a href="{{ path('app_etudiant_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Réinitialiser
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
     <div class="card">
         <div class="card-body">
             {% if etudiants is empty %}
@@ -17,6 +112,24 @@
                     <i class="fas fa-info-circle"></i> Aucun étudiant trouvé.
                 </div>
             {% else %}
+                <!-- Résumé des résultats -->
+                <div class="alert alert-light mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-chart-bar"></i>
+                        <strong>{{ etudiants|length }}</strong> étudiant(s) trouvé(s)
+                        {% if criteria.keyword is defined and criteria.keyword %}
+                            pour "<em>{{ criteria.keyword }}</em>"
+                        {% endif %}
+                    </div>
+                    <div>
+                        <small class="text-muted">
+                            Trié par: <strong>{{ (criteria.sortBy is defined ? criteria.sortBy : 'nom')|capitalize }}</strong>
+                            ({{ (criteria.sortOrder is defined ? criteria.sortOrder : 'ASC') == 'ASC' ? 'Croissant' : 'Décroissant' }})
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Tableau -->
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-light">

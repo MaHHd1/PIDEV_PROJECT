@@ -6,21 +6,26 @@ use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 class AuthChecker
 {
     private $requestStack;
     private UtilisateurRepository $userRepository;
     private EntityManagerInterface $entityManager;
+    private MailerInterface $mailer;
 
     public function __construct(
         RequestStack $requestStack,
         UtilisateurRepository $userRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer
     ) {
         $this->requestStack = $requestStack;
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
+        $this->mailer = $mailer;
     }
 
     // Helper method to get session
@@ -87,12 +92,13 @@ class AuthChecker
         return $this->getSession()->get('user_name');
     }
 
-    // Create password reset token
+    // Create password reset token WITH EMAIL
     public function createPasswordReset(string $email): ?array
     {
         $user = $this->userRepository->findByEmail($email);
 
         if (!$user) {
+            // For security, don't reveal if email exists
             return null;
         }
 
@@ -108,11 +114,72 @@ class AuthChecker
 
         $this->entityManager->flush();
 
+        // SEND EMAIL
+        $this->sendResetEmail($user, $token, $expiresAt);
+
         return [
             'user' => $user,
             'token' => $token,
             'expires_at' => $expiresAt
         ];
+    }
+
+    private function sendResetEmail(Utilisateur $user, string $token, \DateTime $expiresAt): void
+    {
+        // Use your application URL - you might want to get this from configuration
+        $appUrl = $_ENV['APP_URL'] ?? 'http://localhost:8000';
+        $resetLink = $appUrl . '/reset-password/' . $token;
+
+        $email = (new Email())
+            ->from('no-reply@yourdomain.com')
+            ->to($user->getEmail())
+            ->subject('Réinitialisation de votre mot de passe')
+            ->html($this->getEmailTemplate($user, $resetLink, $expiresAt));
+
+        try {
+            $this->mailer->send($email);
+        } catch (\Exception $e) {
+            // Log the error but don't throw it - user should still get feedback
+            error_log('Failed to send reset email: ' . $e->getMessage());
+        }
+    }
+
+    private function getEmailTemplate(Utilisateur $user, string $resetLink, \DateTime $expiresAt): string
+    {
+        return '
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .button { 
+                        background-color: #007bff; 
+                        color: white; 
+                        padding: 10px 20px; 
+                        text-decoration: none; 
+                        border-radius: 5px; 
+                        display: inline-block; 
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h2>Réinitialisation de mot de passe</h2>
+                    <p>Bonjour ' . htmlspecialchars($user->getNomComplet()) . ',</p>
+                    <p>Vous avez demandé à réinitialiser votre mot de passe.</p>
+                    <p>Cliquez sur le lien ci-dessous pour procéder :</p>
+                    <p>
+                        <a href="' . $resetLink . '" class="button">Réinitialiser mon mot de passe</a>
+                    </p>
+                    <p>Ce lien expirera le : ' . $expiresAt->format('d/m/Y à H:i') . '</p>
+                    <p>Si vous n\'avez pas demandé cette réinitialisation, veuillez ignorer cet email.</p>
+                    <hr>
+                    <p><small>Ceci est un email automatique, merci de ne pas y répondre.</small></p>
+                </div>
+            </body>
+            </html>
+        ';
     }
 
     // Check if reset token is valid - OPTIMIZED VERSION

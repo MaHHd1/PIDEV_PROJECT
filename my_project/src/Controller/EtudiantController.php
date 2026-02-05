@@ -5,7 +5,8 @@ namespace App\Controller;
 use App\Entity\Etudiant;
 use App\Form\EtudiantType;
 use App\Repository\EtudiantRepository;
-use App\Service\AuthChecker;  // CORRECTED: This use statement should be here
+use App\Service\AuthChecker;
+use App\Service\SearchService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,10 +16,12 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/etudiant')]
 class EtudiantController extends AbstractController
 {
-    #[Route('/', name: 'app_etudiant_index', methods: ['GET'])]
+    #[Route('/', name: 'app_etudiant_index', methods: ['GET', 'POST'])]
     public function index(
         EtudiantRepository $etudiantRepository,
-        AuthChecker $authChecker
+        AuthChecker $authChecker,
+        Request $request,
+        SearchService $searchService
     ): Response
     {
         // ADD THIS CHECK
@@ -26,8 +29,27 @@ class EtudiantController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        // Get search criteria from request
+        $criteria = [];
+        if ($request->getMethod() === 'POST') {
+            $criteria = $request->request->all();
+        } else {
+            $criteria = $request->query->all();
+        }
+
+        // Get filter options
+        $filterOptions = $searchService->getDistinctValues('etudiant', $etudiantRepository);
+
+        // Perform search if any criteria, otherwise get all
+        $etudiants = !empty(array_filter($criteria))
+            ? $searchService->searchEtudiants($criteria, $etudiantRepository)
+            : $etudiantRepository->findAll();
+
         return $this->render('etudiant/index.html.twig', [
-            'etudiants' => $etudiantRepository->findAll(),
+            'etudiants' => $etudiants,
+            'criteria' => $criteria,
+            'niveaux' => $filterOptions['niveaux'] ?? [],
+            'specialisations' => $filterOptions['specialisations'] ?? [],
         ]);
     }
 

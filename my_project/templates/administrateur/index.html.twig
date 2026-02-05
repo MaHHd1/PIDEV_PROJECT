@@ -10,6 +10,95 @@
         </a>
     </div>
 
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-search"></i> Recherche et Filtrage</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ path('app_administrateur_index') }}">
+                <div class="row">
+                    <!-- Recherche globale -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Recherche globale</label>
+                        <input type="text"
+                               class="form-control"
+                               name="keyword"
+                               value="{{ criteria.keyword is defined ? criteria.keyword : '' }}"
+                               placeholder="Nom, prénom, email, fonction...">
+                    </div>
+
+                    <!-- Filtres -->
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Département</label>
+                        <select class="form-select" name="departement">
+                            <option value="">Tous</option>
+                            {% for departement in departements %}
+                                <option value="{{ departement }}" {{ (criteria.departement is defined and criteria.departement == departement) ? 'selected' : '' }}>
+                                    {{ departement }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Statut</label>
+                        <select class="form-select" name="actif">
+                            <option value="">Tous</option>
+                            <option value="1" {{ (criteria.actif is defined and criteria.actif == '1') ? 'selected' : '' }}>Actif</option>
+                            <option value="0" {{ (criteria.actif is defined and criteria.actif == '0') ? 'selected' : '' }}>Inactif</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Fonction</label>
+                        <input type="text"
+                               class="form-control"
+                               name="fonction"
+                               value="{{ criteria.fonction is defined ? criteria.fonction : '' }}"
+                               placeholder="Ex: Directeur">
+                    </div>
+                </div>
+
+                <!-- Ligne 2 : Tri -->
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Trier par</label>
+                        <select class="form-select" name="sortBy">
+                            <option value="nom" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'nom' ? 'selected' : '' }}>Nom</option>
+                            <option value="prenom" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'prenom' ? 'selected' : '' }}>Prénom</option>
+                            <option value="email" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'email' ? 'selected' : '' }}>Email</option>
+                            <option value="departement" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'departement' ? 'selected' : '' }}>Département</option>
+                            <option value="fonction" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'fonction' ? 'selected' : '' }}>Fonction</option>
+                            <option value="telephone" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'telephone' ? 'selected' : '' }}>Téléphone</option>
+                            <option value="dateNomination" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'dateNomination' ? 'selected' : '' }}>Date de nomination</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Ordre</label>
+                        <select class="form-select" name="sortOrder">
+                            <option value="ASC" {{ (criteria.sortOrder is defined ? criteria.sortOrder : 'ASC') == 'ASC' ? 'selected' : '' }}>Croissant (A-Z)</option>
+                            <option value="DESC" {{ (criteria.sortOrder is defined ? criteria.sortOrder : 'ASC') == 'DESC' ? 'selected' : '' }}>Décroissant (Z-A)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3 d-flex align-items-end">
+                        <div class="btn-group w-100">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Appliquer les filtres
+                            </button>
+                            <a href="{{ path('app_administrateur_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Réinitialiser
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
     <div class="card">
         <div class="card-body">
             {% if administrateurs is empty %}
@@ -17,6 +106,23 @@
                     <i class="fas fa-info-circle"></i> Aucun administrateur trouvé.
                 </div>
             {% else %}
+                <!-- Résumé des résultats -->
+                <div class="alert alert-light mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-chart-bar"></i>
+                        <strong>{{ administrateurs|length }}</strong> administrateur(s) trouvé(s)
+                        {% if criteria.keyword is defined and criteria.keyword %}
+                            pour "<em>{{ criteria.keyword }}</em>"
+                        {% endif %}
+                    </div>
+                    <div>
+                        <small class="text-muted">
+                            Trié par: <strong>{{ (criteria.sortBy is defined ? criteria.sortBy : 'nom')|capitalize }}</strong>
+                            ({{ (criteria.sortOrder is defined ? criteria.sortOrder : 'ASC') == 'ASC' ? 'Croissant' : 'Décroissant' }})
+                        </small>
+                    </div>
+                </div>
+
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-light">

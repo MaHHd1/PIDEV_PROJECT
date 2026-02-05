@@ -60,17 +60,18 @@ class AuthController extends AbstractController
             $result = $authChecker->createPasswordReset($email);
 
             if ($result) {
-                $token = $result['token'];
-                $resetLink = $request->getSchemeAndHttpHost() . '/reset-password/' . $token;
-
+                // Don't show the link anymore - it's sent by email
                 $message = [
                     'type' => 'success',
-                    'text' => 'Lien de réinitialisation créé.',
-                    'link' => $resetLink,
-                    'note' => 'Dans une vraie application, ce lien serait envoyé par email.'
+                    'text' => 'Un email avec les instructions de réinitialisation a été envoyé à votre adresse.',
+                    'note' => 'Vérifiez votre boîte de réception (et vos spams).'
                 ];
             } else {
-                $error = 'Email non trouvé.';
+                // For security, show the same message whether email exists or not
+                $message = [
+                    'type' => 'info',
+                    'text' => 'Si votre email est enregistré, vous recevrez un lien de réinitialisation.'
+                ];
             }
         }
 

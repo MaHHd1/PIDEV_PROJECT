@@ -6,6 +6,7 @@ use App\Entity\Administrateur;
 use App\Form\AdministrateurType;
 use App\Repository\AdministrateurRepository;
 use App\Service\AuthChecker;
+use App\Service\SearchService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,16 +16,39 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/administrateur')]
 class AdministrateurController extends AbstractController
 {
-    #[Route('/', name: 'app_administrateur_index', methods: ['GET'])]
-    public function index(AdministrateurRepository $administrateurRepository, AuthChecker $authChecker): Response
+    #[Route('/', name: 'app_administrateur_index', methods: ['GET', 'POST'])]
+    public function index(
+        AdministrateurRepository $administrateurRepository,
+        AuthChecker $authChecker,
+        Request $request,
+        SearchService $searchService
+    ): Response
     {
         // Authentication check
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
         }
 
+        // Get search criteria from request
+        $criteria = [];
+        if ($request->getMethod() === 'POST') {
+            $criteria = $request->request->all();
+        } else {
+            $criteria = $request->query->all();
+        }
+
+        // Get filter options
+        $filterOptions = $searchService->getDistinctValues('administrateur', $administrateurRepository);
+
+        // Perform search if any criteria, otherwise get all
+        $administrateurs = !empty(array_filter($criteria))
+            ? $searchService->searchAdministrateurs($criteria, $administrateurRepository)
+            : $administrateurRepository->findAll();
+
         return $this->render('administrateur/index.html.twig', [
-            'administrateurs' => $administrateurRepository->findAll(),
+            'administrateurs' => $administrateurs,
+            'criteria' => $criteria,
+            'departements' => $filterOptions['departements'] ?? [],
         ]);
     }
 

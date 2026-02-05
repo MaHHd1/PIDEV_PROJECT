@@ -21,6 +21,28 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    # =============================================
+    # PDO SESSION HANDLER FOR DATABASE SESSIONS
+    # =============================================
+    Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler:
+        arguments:
+            # Database connection string
+            - 'mysql:host=127.0.0.1;dbname=gestion_utilisateur;charset=utf8mb4'
+            # Configuration options
+            - {
+                db_table: 'sessions',
+                db_id_col: 'sess_id',
+                db_data_col: 'sess_data',
+                db_lifetime_col: 'sess_lifetime',
+                db_time_col: 'sess_time',
+                db_username: 'root',
+                db_password: ''
+            }
+        public: true  # Make it public so Symfony can use it
+
+    # Alias for easier reference
+    session.handler.pdo:
+        alias: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

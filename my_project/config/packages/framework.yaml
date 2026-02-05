@@ -1,20 +1,19 @@
-# see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
     annotations: false
     http_method_override: false
     handle_all_throwables: true
 
-    # Enables session support. Note that the session will ONLY be started if you read or write from it.
-    # Remove or comment this section to explicitly disable session support.
     session:
-        handler_id: null
+        # Use our PDO session handler
+        handler_id: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
         cookie_secure: auto
         cookie_samesite: lax
         storage_factory_id: session.storage.factory.native
+        name: SYMFONY_SESS
+        cookie_httponly: true
+        save_path: null
 
-    #esi: true
-    #fragments: true
     php_errors:
         log: true
 

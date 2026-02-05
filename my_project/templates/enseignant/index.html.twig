@@ -10,6 +10,101 @@
         </a>
     </div>
 
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-search"></i> Recherche et Filtrage</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ path('app_enseignant_index') }}">
+                <div class="row">
+                    <!-- Recherche globale -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Recherche globale</label>
+                        <input type="text"
+                               class="form-control"
+                               name="keyword"
+                               value="{{ criteria.keyword is defined ? criteria.keyword : '' }}"
+                               placeholder="Nom, prénom, email, matricule...">
+                    </div>
+
+                    <!-- Filtres -->
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Statut</label>
+                        <select class="form-select" name="statut">
+                            <option value="">Tous</option>
+                            <option value="actif" {{ (criteria.statut is defined and criteria.statut == 'actif') ? 'selected' : '' }}>Actif</option>
+                            <option value="inactif" {{ (criteria.statut is defined and criteria.statut == 'inactif') ? 'selected' : '' }}>Inactif</option>
+                            <option value="conge" {{ (criteria.statut is defined and criteria.statut == 'conge') ? 'selected' : '' }}>Congé</option>
+                            <option value="retraite" {{ (criteria.statut is defined and criteria.statut == 'retraite') ? 'selected' : '' }}>Retraite</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Spécialité</label>
+                        <select class="form-select" name="specialite">
+                            <option value="">Toutes</option>
+                            {% for specialite in specialites %}
+                                <option value="{{ specialite }}" {{ (criteria.specialite is defined and criteria.specialite == specialite) ? 'selected' : '' }}>
+                                    {{ specialite }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Type de contrat</label>
+                        <select class="form-select" name="typeContrat">
+                            <option value="">Tous</option>
+                            {% for contrat in contrats %}
+                                <option value="{{ contrat }}" {{ (criteria.typeContrat is defined and criteria.typeContrat == contrat) ? 'selected' : '' }}>
+                                    {{ contrat }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Ligne 2 : Tri -->
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Trier par</label>
+                        <select class="form-select" name="sortBy">
+                            <option value="nom" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'nom' ? 'selected' : '' }}>Nom</option>
+                            <option value="prenom" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'prenom' ? 'selected' : '' }}>Prénom</option>
+                            <option value="email" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'email' ? 'selected' : '' }}>Email</option>
+                            <option value="matricule" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'matricule' ? 'selected' : '' }}>Matricule</option>
+                            <option value="specialite" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'specialite' ? 'selected' : '' }}>Spécialité</option>
+                            <option value="diplome" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'diplome' ? 'selected' : '' }}>Diplôme</option>
+                            <option value="experience" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'experience' ? 'selected' : '' }}>Années d'expérience</option>
+                            <option value="typeContrat" {{ (criteria.sortBy is defined ? criteria.sortBy : 'nom') == 'typeContrat' ? 'selected' : '' }}>Type de contrat</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Ordre</label>
+                        <select class="form-select" name="sortOrder">
+                            <option value="ASC" {{ (criteria.sortOrder is defined ? criteria.sortOrder : 'ASC') == 'ASC' ? 'selected' : '' }}>Croissant (A-Z)</option>
+                            <option value="DESC" {{ (criteria.sortOrder is defined ? criteria.sortOrder : 'ASC') == 'DESC' ? 'selected' : '' }}>Décroissant (Z-A)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3 d-flex align-items-end">
+                        <div class="btn-group w-100">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Appliquer les filtres
+                            </button>
+                            <a href="{{ path('app_enseignant_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Réinitialiser
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
     <div class="card">
         <div class="card-body">
             {% if enseignants is empty %}
@@ -17,6 +112,23 @@
                     <i class="fas fa-info-circle"></i> Aucun enseignant trouvé.
                 </div>
             {% else %}
+                <!-- Résumé des résultats -->
+                <div class="alert alert-light mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-chart-bar"></i>
+                        <strong>{{ enseignants|length }}</strong> enseignant(s) trouvé(s)
+                        {% if criteria.keyword is defined and criteria.keyword %}
+                            pour "<em>{{ criteria.keyword }}</em>"
+                        {% endif %}
+                    </div>
+                    <div>
+                        <small class="text-muted">
+                            Trié par: <strong>{{ (criteria.sortBy is defined ? criteria.sortBy : 'nom')|capitalize }}</strong>
+                            ({{ (criteria.sortOrder is defined ? criteria.sortOrder : 'ASC') == 'ASC' ? 'Croissant' : 'Décroissant' }})
+                        </small>
+                    </div>
+                </div>
+
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-light">
