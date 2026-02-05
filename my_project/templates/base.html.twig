@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestion des Utilisateurs{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    {% block stylesheets %}
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f8f9fa;
+            }
+            .navbar {
+                box-shadow: 0 2px 4px rgba(0,0,0,.1);
+            }
+            .card {
+                border: none;
+                border-radius: 10px;
+                box-shadow: 0 0 20px rgba(0,0,0,.08);
+                margin-bottom: 20px;
+            }
+            .card-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 10px 10px 0 0 !important;
+                padding: 15px 20px;
+            }
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+            }
+            .btn-primary:hover {
+                background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            }
+            .table {
+                background: white;
+            }
+            .badge {
+                padding: 5px 10px;
+                border-radius: 5px;
+            }
+            .alert {
+                border-radius: 10px;
+                border: none;
+            }
+            .form-control:focus, .form-select:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            }
+            .stat-card {
+                background: white;
+                border-left: 4px solid;
+                transition: transform 0.3s;
+            }
+            .stat-card:hover {
+                transform: translateY(-5px);
+            }
+            .stat-card.students {
+                border-color: #667eea;
+            }
+            .stat-card.teachers {
+                border-color: #f093fb;
+            }
+            .stat-card.admins {
+                border-color: #4facfe;
+            }
+            .user-info {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 5px 15px;
+                border-radius: 20px;
+                margin-right: 10px;
+            }
+        </style>
+    {% endblock %}
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ path('app_home') }}">
+            <i class="fas fa-graduation-cap"></i> Gestion Utilisateurs
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_home') }}">
+                        <i class="fas fa-home"></i> Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_etudiant_index') }}">
+                        <i class="fas fa-user-graduate"></i> Étudiants
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_enseignant_index') }}">
+                        <i class="fas fa-chalkboard-teacher"></i> Enseignants
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_administrateur_index') }}">
+                        <i class="fas fa-user-tie"></i> Administrateurs
+                    </a>
+                </li>
+            </ul>
+
+            {% if app.session.get('logged_in') %}
+                <div class="navbar-text me-3">
+                    <span class="user-info">
+                        <i class="fas fa-user"></i> {{ app.session.get('user_name') }}
+                        <small class="badge bg-secondary ms-1">{{ app.session.get('user_type')|capitalize }}</small>
+                    </span>
+                </div>
+                <div class="d-flex">
+                    <a href="{{ path('app_change_password') }}" class="btn btn-outline-light btn-sm me-2">
+                        <i class="fas fa-key"></i>
+                    </a>
+                    <a href="{{ path('app_logout') }}" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
+                </div>
+            {% else %}
+                <div>
+                    <a href="{{ path('app_login') }}" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-sign-in-alt"></i> Connexion
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<!-- Flash Messages -->
+<div class="container mt-3">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+
+<!-- Content -->
+<main class="container mt-4">
+    {% block body %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer class="text-center mt-5 mb-3 text-muted">
+    <p>&copy; {{ "now"|date("Y") }} Gestion des Utilisateurs - Tous droits réservés</p>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

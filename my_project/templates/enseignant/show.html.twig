@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Enseignant{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-chalkboard-teacher"></i> Détails de l'Enseignant</h4>
+                    <span class="badge bg-{{ enseignant.statut == 'actif' ? 'success' : 'secondary' }}">
+                    {{ enseignant.statut|upper }}
+                </span>
+                </div>
+                <div class="card-body">
+                    <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-user"></i> Informations Personnelles</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Matricule</h6>
+                            <p class="h5">{{ enseignant.matriculeEnseignant }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Nom Complet</h6>
+                            <p class="h5">{{ enseignant.nomComplet }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Email</h6>
+                            <p><i class="fas fa-envelope"></i> {{ enseignant.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Date de Création</h6>
+                            <p><i class="fas fa-calendar"></i> {{ enseignant.dateCreation|date('d/m/Y H:i') }}</p>
+                        </div>
+                    </div>
+
+                    <h5 class="border-bottom pb-2 mb-3 mt-4"><i class="fas fa-graduation-cap"></i> Informations Académiques</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Diplôme</h6>
+                            <p><span class="badge bg-info">{{ enseignant.diplome }}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Spécialité</h6>
+                            <p>{{ enseignant.specialite }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Années d'Expérience</h6>
+                            <p><strong>{{ enseignant.anneesExperience }}</strong> ans</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Type de Contrat</h6>
+                            <p>
+                                {% if enseignant.typeContrat == 'CDI' %}
+                                    <span class="badge bg-success">{{ enseignant.typeContrat }}</span>
+                                {% elseif enseignant.typeContrat == 'Vacataire' %}
+                                    <span class="badge bg-warning">{{ enseignant.typeContrat }}</span>
+                                {% else %}
+                                    <span class="badge bg-primary">{{ enseignant.typeContrat }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if enseignant.tauxHoraire %}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Taux Horaire</h6>
+                                <p class="h5 text-success">{{ enseignant.tauxHoraire }} €/h</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if enseignant.disponibilites %}
+                        <div class="mb-3">
+                            <h6 class="text-muted">Disponibilités</h6>
+                            <div class="alert alert-light">
+                                {{ enseignant.disponibilites|nl2br }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_enseignant_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                        <div>
+                            <a href="{{ path('app_enseignant_edit', {'id': enseignant.id}) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <form method="post"
+                                  action="{{ path('app_enseignant_delete', {'id': enseignant.id}) }}"
+                                  style="display:inline-block;"
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet enseignant?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ enseignant.id) }}">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

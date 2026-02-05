@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Administrateurs{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-user-tie"></i> Liste des Administrateurs</h1>
+        <a href="{{ path('app_administrateur_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouvel Administrateur
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if administrateurs is empty %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Aucun administrateur trouvé.
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom Complet</th>
+                            <th>Email</th>
+                            <th>Département</th>
+                            <th>Fonction</th>
+                            <th>Téléphone</th>
+                            <th>Date Nomination</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for administrateur in administrateurs %}
+                            <tr>
+                                <td><strong>#{{ administrateur.id }}</strong></td>
+                                <td>{{ administrateur.nomComplet }}</td>
+                                <td>{{ administrateur.email }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ administrateur.departement }}</span>
+                                </td>
+                                <td>{{ administrateur.fonction }}</td>
+                                <td>
+                                    {% if administrateur.telephone %}
+                                        <i class="fas fa-phone"></i> {{ administrateur.telephone }}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ administrateur.dateNomination|date('d/m/Y') }}</td>
+                                <td>
+                                    {% if administrateur.actif %}
+                                        <span class="badge bg-success">Actif</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactif</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_administrateur_show', {'id': administrateur.id}) }}"
+                                       class="btn btn-sm btn-info" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_administrateur_edit', {'id': administrateur.id}) }}"
+                                       class="btn btn-sm btn-warning" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post"
+                                          action="{{ path('app_administrateur_delete', {'id': administrateur.id}) }}"
+                                          style="display:inline-block;"
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet administrateur?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ administrateur.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
