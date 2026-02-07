@@ -16,6 +16,27 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/etudiant')]
 class EtudiantController extends AbstractController
 {
+    #[Route('/dashboard', name: 'app_etudiant_dashboard', methods: ['GET'])]
+    public function dashboard(AuthChecker $authChecker): Response
+    {
+        // Vérifier si l'utilisateur est connecté
+        if (!$authChecker->isLoggedIn()) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Vérifier si l'utilisateur est un étudiant
+        if (!$authChecker->isEtudiant()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux étudiants.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $student = $authChecker->getCurrentUser();
+
+        return $this->render('etudiant/dashboard.html.twig', [
+            'student' => $student,
+        ]);
+    }
+
     #[Route('/', name: 'app_etudiant_index', methods: ['GET', 'POST'])]
     public function index(
         EtudiantRepository $etudiantRepository,
@@ -24,9 +45,20 @@ class EtudiantController extends AbstractController
         SearchService $searchService
     ): Response
     {
-        // ADD THIS CHECK
+        // Vérifier si l'utilisateur est connecté
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
+        }
+
+        // Si l'utilisateur est un étudiant, le rediriger vers son dashboard
+        if ($authChecker->isEtudiant()) {
+            return $this->redirectToRoute('app_etudiant_dashboard');
+        }
+
+        // Seuls les administrateurs peuvent voir la liste des étudiants
+        if (!$authChecker->isAdmin()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux administrateurs.');
+            return $this->redirectToRoute('app_home');
         }
 
         // Get search criteria from request
@@ -60,9 +92,15 @@ class EtudiantController extends AbstractController
         AuthChecker $authChecker
     ): Response
     {
-        // ADD THIS CHECK
+        // Vérifier si l'utilisateur est connecté
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
+        }
+
+        // Seuls les administrateurs peuvent créer des étudiants
+        if (!$authChecker->isAdmin()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux administrateurs.');
+            return $this->redirectToRoute('app_home');
         }
 
         $etudiant = new Etudiant();
@@ -82,9 +120,9 @@ class EtudiantController extends AbstractController
             return $this->redirectToRoute('app_etudiant_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('etudiant/new.html.twig', [
+        return $this->render('admin/etudiant_new.html.twig', [
             'etudiant' => $etudiant,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -94,9 +132,15 @@ class EtudiantController extends AbstractController
         AuthChecker $authChecker
     ): Response
     {
-        // ADD THIS CHECK
+        // Vérifier si l'utilisateur est connecté
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
+        }
+
+        // Seuls les administrateurs peuvent voir les détails des étudiants
+        if (!$authChecker->isAdmin()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux administrateurs.');
+            return $this->redirectToRoute('app_home');
         }
 
         return $this->render('etudiant/show.html.twig', [
@@ -112,9 +156,15 @@ class EtudiantController extends AbstractController
         AuthChecker $authChecker
     ): Response
     {
-        // ADD THIS CHECK
+        // Vérifier si l'utilisateur est connecté
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
+        }
+
+        // Seuls les administrateurs peuvent modifier les étudiants
+        if (!$authChecker->isAdmin()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux administrateurs.');
+            return $this->redirectToRoute('app_home');
         }
 
         $form = $this->createForm(EtudiantType::class, $etudiant, ['is_edit' => true]);
@@ -134,9 +184,9 @@ class EtudiantController extends AbstractController
             return $this->redirectToRoute('app_etudiant_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('etudiant/edit.html.twig', [
+        return $this->render('admin/etudiant_edit.html.twig', [
             'etudiant' => $etudiant,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -148,9 +198,15 @@ class EtudiantController extends AbstractController
         AuthChecker $authChecker
     ): Response
     {
-        // ADD THIS CHECK
+        // Vérifier si l'utilisateur est connecté
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
+        }
+
+        // Seuls les administrateurs peuvent supprimer des étudiants
+        if (!$authChecker->isAdmin()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux administrateurs.');
+            return $this->redirectToRoute('app_home');
         }
 
         if ($this->isCsrfTokenValid('delete'.$etudiant->getId(), $request->request->get('_token'))) {

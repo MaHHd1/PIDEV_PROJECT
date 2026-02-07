@@ -2,6 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\Etudiant;
+use App\Entity\Enseignant;
+use App\Entity\Administrateur;
 use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -75,15 +78,52 @@ class AuthChecker
         $this->getSession()->clear();
     }
 
-    // Get current user
-    public function getCurrentUser(): ?Utilisateur
+    // Get current user - CORRIGÉ pour retourner l'entité spécifique
+    public function getCurrentUser(): ?object
     {
         if (!$this->isLoggedIn()) {
             return null;
         }
 
         $userId = $this->getSession()->get('user_id');
-        return $this->userRepository->find($userId);
+        $userType = $this->getSession()->get('user_type');
+
+        // Retourner l'entité spécifique selon le type
+        switch ($userType) {
+            case 'etudiant':
+                return $this->entityManager->getRepository(Etudiant::class)->find($userId);
+            case 'enseignant':
+                return $this->entityManager->getRepository(Enseignant::class)->find($userId);
+            case 'administrateur':
+                return $this->entityManager->getRepository(Administrateur::class)->find($userId);
+            default:
+                return $this->userRepository->find($userId);
+        }
+    }
+
+    // AJOUTEZ CES MÉTHODES :
+    public function isEtudiant(): bool
+    {
+        $user = $this->getCurrentUser();
+        return $user instanceof Etudiant;
+    }
+
+    public function isEnseignant(): bool
+    {
+        $user = $this->getCurrentUser();
+        return $user instanceof Enseignant;
+    }
+
+    public function isAdmin(): bool
+    {
+        $user = $this->getCurrentUser();
+        return $user instanceof Administrateur;
+    }
+
+    public function getUserType(): ?string
+    {
+        $user = $this->getCurrentUser();
+        return $user ? $user->getType() : null;
     }
 
     // Get user name for display

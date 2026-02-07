@@ -1,114 +1,198 @@
+{# templates/home/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Tableau de Bord{% endblock %}
+{% block title %}Accueil - Plateforme Universitaire{% endblock %}
 
 {% block body %}
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="display-6">
-                <i class="fas fa-tachometer-alt"></i> Tableau de Bord
-            </h1>
-            {% if app.session.get('logged_in') %}
-                <p class="lead">
-                    Bienvenue, <strong>{{ app.session.get('user_name') }}</strong> !
-                    Vous êtes connecté en tant que <span class="badge bg-primary">{{ app.session.get('user_type')|capitalize }}</span>.
-                </p>
-            {% endif %}
-        </div>
-    </div>
+    <!-- Page content START -->
+    <section class="pt-0">
+        <div class="container">
+            <!-- Hero section START -->
+            <div class="row g-4 align-items-center">
+                <div class="col-md-6">
+                    <!-- Title -->
+                    <h1 class="display-5 mb-3">Bienvenue sur la Plateforme Universitaire</h1>
+                    <p class="lead mb-0">
+                        Une solution complète pour la gestion des étudiants, enseignants et administrateurs.
+                        Accédez à votre espace personnel et gérez vos informations académiques en toute simplicité.
+                    </p>
+                    <!-- Buttons -->
+                    <div class="mt-4">
+                        {% if current_user %}
+                            {% if is_admin %}
+                                <a href="{{ path('app_administrateur_dashboard') }}" class="btn btn-primary mb-0">Accéder au Panel Admin</a>
+                            {% elseif is_enseignant %}
+                                <a href="{{ path('app_enseignant_dashboard') }}" class="btn btn-primary mb-0">Accéder à mon Espace</a>
+                            {% elseif is_etudiant %}
+                                <a href="{{ path('app_etudiant_dashboard') }}" class="btn btn-primary mb-0">Accéder à mon Espace</a>
+                            {% endif %}
+                        {% else %}
+                            <!-- SIMPLE FIX: Always show login button when not logged in -->
+                            <a href="{{ path('app_login') }}" class="btn btn-primary mb-0">Se connecter</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <!-- Image -->
+                    <img src="{{ asset('assets/images/element/01.svg') }}" alt="hero-image" class="img-fluid">
+                </div>
+            </div>
+            <!-- Hero section END -->
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card stat-card students">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Étudiants</h6>
-                            <h3 class="mb-0">{{ stats.etudiants }}</h3>
-                        </div>
-                        <div class="icon text-primary">
-                            <i class="fas fa-user-graduate fa-2x"></i>
-                        </div>
-                    </div>
+            <!-- Stats section START -->
+            <div class="row g-4 mt-5">
+                <div class="col-12">
+                    <h3 class="mb-4">Statistiques de la plateforme</h3>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card stat-card teachers">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Enseignants</h6>
-                            <h3 class="mb-0">{{ stats.enseignants }}</h3>
-                        </div>
-                        <div class="icon text-warning">
-                            <i class="fas fa-chalkboard-teacher fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card stat-card admins">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Administrateurs</h6>
-                            <h3 class="mb-0">{{ stats.administrateurs }}</h3>
-                        </div>
-                        <div class="icon text-info">
-                            <i class="fas fa-user-tie fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Quick Actions -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Actions Rapides</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <a href="{{ path('app_etudiant_new') }}" class="btn btn-primary w-100">
-                                <i class="fas fa-user-plus me-2"></i> Ajouter un Étudiant
-                            </a>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <a href="{{ path('app_enseignant_new') }}" class="btn btn-warning w-100">
-                                <i class="fas fa-user-plus me-2"></i> Ajouter un Enseignant
-                            </a>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <a href="{{ path('app_administrateur_new') }}" class="btn btn-info w-100">
-                                <i class="fas fa-user-plus me-2"></i> Ajouter un Administrateur
-                            </a>
+                <!-- Stat 1 -->
+                <div class="col-md-4">
+                    <div class="card card-body bg-primary bg-opacity-10 border border-primary border-opacity-25 p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="mb-0 fw-bold">{{ stats.etudiants }}</h2>
+                                <span class="mb-0 h6 fw-light">Étudiants</span>
+                            </div>
+                            <div class="icon-lg rounded-circle bg-primary text-white mb-0">
+                                <i class="fas fa-user-graduate fa-fw"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    {% if not app.session.get('logged_in') %}
-        <div class="row mt-4">
-            <div class="col-md-6 offset-md-3">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-exclamation-triangle text-warning"></i> Non connecté</h5>
-                        <p>Veuillez vous connecter pour accéder à toutes les fonctionnalités.</p>
-                        <a href="{{ path('app_login') }}" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt me-2"></i> Se connecter
-                        </a>
+                <!-- Stat 2 -->
+                <div class="col-md-4">
+                    <div class="card card-body bg-success bg-opacity-10 border border-success border-opacity-25 p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="mb-0 fw-bold">{{ stats.enseignants }}</h2>
+                                <span class="mb-0 h6 fw-light">Enseignants</span>
+                            </div>
+                            <div class="icon-lg rounded-circle bg-success text-white mb-0">
+                                <i class="fas fa-user-tie fa-fw"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat 3 -->
+                <div class="col-md-4">
+                    <div class="card card-body bg-purple bg-opacity-10 border border-purple border-opacity-25 p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="mb-0 fw-bold">{{ stats.administrateurs }}</h2>
+                                <span class="mb-0 h6 fw-light">Administrateurs</span>
+                            </div>
+                            <div class="icon-lg rounded-circle bg-purple text-white mb-0">
+                                <i class="fas fa-user-cog fa-fw"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            <!-- Stats section END -->
+
+            <!-- Features section START -->
+            <div class="row g-4 mt-5">
+                <div class="col-12">
+                    <h3 class="mb-4">Nos fonctionnalités</h3>
+                </div>
+
+                <!-- Feature 1 -->
+                <div class="col-md-4">
+                    <div class="card border h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-xl bg-primary bg-opacity-10 text-primary rounded-circle mb-3 mx-auto">
+                                <i class="fas fa-graduation-cap fa-fw"></i>
+                            </div>
+                            <h5 class="card-title">Gestion académique</h5>
+                            <p class="card-text">
+                                Suivez votre progression académique, consultez vos notes et téléchargez vos documents.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="col-md-4">
+                    <div class="card border h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-xl bg-success bg-opacity-10 text-success rounded-circle mb-3 mx-auto">
+                                <i class="fas fa-book fa-fw"></i>
+                            </div>
+                            <h5 class="card-title">Ressources pédagogiques</h5>
+                            <p class="card-text">
+                                Accédez à une bibliothèque de ressources pédagogiques et supports de cours.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="col-md-4">
+                    <div class="card border h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-xl bg-warning bg-opacity-10 text-warning rounded-circle mb-3 mx-auto">
+                                <i class="fas fa-comments fa-fw"></i>
+                            </div>
+                            <h5 class="card-title">Communication</h5>
+                            <p class="card-text">
+                                Communiquez facilement avec vos enseignants et collègues étudiants.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Features section END -->
+
+            <!-- Login Access Section START -->
+            <div class="row g-4 mt-5">
+                <div class="col-12">
+                    <div class="card bg-light border-0">
+                        <div class="card-body p-5 text-center">
+                            <h3 class="mb-3">Accédez à votre compte</h3>
+                            <p class="mb-4">
+                                Connectez-vous pour accéder à toutes les fonctionnalités de la plateforme.
+                            </p>
+                            {% if not current_user %}
+                                <a href="{{ path('app_login') }}" class="btn btn-primary btn-lg mb-0">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                                </a>
+                                <p class="small mt-3 text-muted">
+                                    Vous n'avez pas de compte ? <a href="#" onclick="alert('Pour créer un compte, contactez l\\'administration.'); return false;">Contactez l'administration</a>
+                                </p>
+                            {% else %}
+                                <div class="alert alert-success mb-0">
+                                    Vous êtes déjà connecté en tant que {{ current_user.email }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Login Access Section END -->
+
+            <!-- Call to action START -->
+            <div class="row g-4 mt-5">
+                <div class="col-12">
+                    <div class="card bg-primary bg-opacity-10 border-0">
+                        <div class="card-body p-5 text-center">
+                            <h3 class="mb-3">Prêt à commencer ?</h3>
+                            <p class="mb-4">
+                                Rejoignez notre communauté académique et bénéficiez de tous les avantages de notre plateforme.
+                            </p>
+                            <!-- SIMPLE FIX: Always show login button when not logged in -->
+                            {% if not current_user %}
+                                <a href="{{ path('app_login') }}" class="btn btn-primary mb-0">Se connecter maintenant</a>
+                            {% else %}
+                                <a href="#" class="btn btn-primary mb-0">Explorer les fonctionnalités</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Call to action END -->
         </div>
-    {% endif %}
+    </section>
+    <!-- Page content END -->
 {% endblock %}

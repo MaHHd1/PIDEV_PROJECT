@@ -15,28 +15,39 @@ class AuthController extends AbstractController
     {
         // If already logged in, go to home
         if ($authChecker->isLoggedIn()) {
+            $this->addFlash('info', 'Vous êtes déjà connecté.');
             return $this->redirectToRoute('app_home');
         }
 
         $error = null;
+        $email = '';
 
         if ($request->isMethod('POST')) {
-            $email = $request->request->get('email');
-            $password = $request->request->get('password');
+            $email = trim($request->request->get('email', ''));
+            $password = trim($request->request->get('password', ''));
 
-            $user = $authChecker->login($email, $password);
-
-            if ($user) {
-                $this->addFlash('success', 'Connexion réussie !');
-                return $this->redirectToRoute('app_home');
+            // PHP validation
+            if (empty($email)) {
+                $error = 'L\'email est requis.';
+            } elseif (empty($password)) {
+                $error = 'Le mot de passe est requis.';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $error = 'Format d\'email invalide.';
             } else {
-                $error = 'Email ou mot de passe incorrect.';
+                $user = $authChecker->login($email, $password);
+
+                if ($user) {
+                    $this->addFlash('success', 'Connexion réussie ! Bienvenue ' . $user->getPrenom() . '!');
+                    return $this->redirectToRoute('app_home');
+                } else {
+                    $error = 'Email ou mot de passe incorrect.';
+                }
             }
         }
 
         return $this->render('auth/login.html.twig', [
             'error' => $error,
-            'email' => $request->request->get('email', '')
+            'email' => $email
         ]);
     }
 
@@ -51,27 +62,37 @@ class AuthController extends AbstractController
     #[Route('/forgot-password', name: 'app_forgot_password')]
     public function forgotPassword(Request $request, AuthChecker $authChecker): Response
     {
+        // If already logged in, no need for password reset
+        if ($authChecker->isLoggedIn()) {
+            return $this->redirectToRoute('app_home');
+        }
+
         $message = null;
         $error = null;
 
         if ($request->isMethod('POST')) {
-            $email = $request->request->get('email');
+            $email = trim($request->request->get('email', ''));
 
-            $result = $authChecker->createPasswordReset($email);
-
-            if ($result) {
-                // Don't show the link anymore - it's sent by email
-                $message = [
-                    'type' => 'success',
-                    'text' => 'Un email avec les instructions de réinitialisation a été envoyé à votre adresse.',
-                    'note' => 'Vérifiez votre boîte de réception (et vos spams).'
-                ];
+            // PHP validation
+            if (empty($email)) {
+                $error = 'L\'email est requis.';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $error = 'Format d\'email invalide.';
             } else {
-                // For security, show the same message whether email exists or not
-                $message = [
-                    'type' => 'info',
-                    'text' => 'Si votre email est enregistré, vous recevrez un lien de réinitialisation.'
-                ];
+                $result = $authChecker->createPasswordReset($email);
+
+                if ($result) {
+                    $message = [
+                        'type' => 'success',
+                        'text' => 'Un email avec les instructions de réinitialisation a été envoyé à votre adresse.',
+                        'note' => 'Vérifiez votre boîte de réception (et vos spams).'
+                    ];
+                } else {
+                    $message = [
+                        'type' => 'info',
+                        'text' => 'Si votre email est enregistré, vous recevrez un lien de réinitialisation.'
+                    ];
+                }
             }
         }
 
@@ -84,6 +105,11 @@ class AuthController extends AbstractController
     #[Route('/reset-password/{token}', name: 'app_reset_password')]
     public function resetPassword(Request $request, AuthChecker $authChecker, string $token): Response
     {
+        // If already logged in, redirect to change password page
+        if ($authChecker->isLoggedIn()) {
+            return $this->redirectToRoute('app_change_password');
+        }
+
         $user = $authChecker->isValidResetToken($token);
 
         if (!$user) {
@@ -94,10 +120,15 @@ class AuthController extends AbstractController
         $error = null;
 
         if ($request->isMethod('POST')) {
-            $password = $request->request->get('password');
-            $confirmPassword = $request->request->get('confirm_password');
+            $password = trim($request->request->get('password', ''));
+            $confirmPassword = trim($request->request->get('confirm_password', ''));
 
-            if ($password !== $confirmPassword) {
+            // PHP validation
+            if (empty($password)) {
+                $error = 'Le mot de passe est requis.';
+            } elseif (empty($confirmPassword)) {
+                $error = 'La confirmation du mot de passe est requise.';
+            } elseif ($password !== $confirmPassword) {
                 $error = 'Les mots de passe ne correspondent pas.';
             } elseif (strlen($password) < 8) {
                 $error = 'Le mot de passe doit avoir au moins 8 caractères.';
@@ -105,10 +136,10 @@ class AuthController extends AbstractController
                 $success = $authChecker->resetPasswordWithToken($token, $password);
 
                 if ($success) {
-                    $this->addFlash('success', 'Mot de passe changé. Connectez-vous.');
+                    $this->addFlash('success', 'Mot de passe changé avec succès. Connectez-vous.');
                     return $this->redirectToRoute('app_login');
                 } else {
-                    $error = 'Erreur. Réessayez.';
+                    $error = 'Erreur lors de la réinitialisation. Réessayez.';
                 }
             }
         }
@@ -133,19 +164,26 @@ class AuthController extends AbstractController
         $error = null;
 
         if ($request->isMethod('POST')) {
-            $currentPassword = $request->request->get('current_password');
-            $newPassword = $request->request->get('new_password');
-            $confirmPassword = $request->request->get('confirm_password');
+            $currentPassword = trim($request->request->get('current_password', ''));
+            $newPassword = trim($request->request->get('new_password', ''));
+            $confirmPassword = trim($request->request->get('confirm_password', ''));
 
-            if ($newPassword !== $confirmPassword) {
+            // PHP validation
+            if (empty($currentPassword)) {
+                $error = 'Le mot de passe actuel est requis.';
+            } elseif (empty($newPassword)) {
+                $error = 'Le nouveau mot de passe est requis.';
+            } elseif (empty($confirmPassword)) {
+                $error = 'La confirmation du mot de passe est requise.';
+            } elseif ($newPassword !== $confirmPassword) {
                 $error = 'Les nouveaux mots de passe ne correspondent pas.';
             } elseif (strlen($newPassword) < 8) {
-                $error = '8 caractères minimum.';
+                $error = 'Le mot de passe doit avoir au moins 8 caractères.';
             } else {
                 $success = $authChecker->changePassword($user, $currentPassword, $newPassword);
 
                 if ($success) {
-                    $this->addFlash('success', 'Mot de passe changé.');
+                    $this->addFlash('success', 'Mot de passe changé avec succès.');
                     return $this->redirectToRoute('app_home');
                 } else {
                     $error = 'Mot de passe actuel incorrect.';
@@ -157,6 +195,14 @@ class AuthController extends AbstractController
             'error' => $error,
             'user' => $user
         ]);
+    }
+
+    // Temporary route for signup - redirects to login with message
+    #[Route('/signup', name: 'app_signup')]
+    public function signup(): Response
+    {
+        $this->addFlash('info', 'Pour créer un compte, contactez l\'administration.');
+        return $this->redirectToRoute('app_login');
     }
 
     // DEBUG ROUTE - REMOVE THIS IN PRODUCTION

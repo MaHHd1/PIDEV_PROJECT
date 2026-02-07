@@ -16,6 +16,27 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/enseignant')]
 class EnseignantController extends AbstractController
 {
+    #[Route('/dashboard', name: 'app_enseignant_dashboard', methods: ['GET'])]
+    public function dashboard(AuthChecker $authChecker): Response
+    {
+        // Authentication check
+        if (!$authChecker->isLoggedIn()) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Check if user is a teacher
+        if (!$authChecker->isEnseignant()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux enseignants.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $enseignant = $authChecker->getCurrentUser();
+
+        return $this->render('enseignant/dashboard.html.twig', [
+            'enseignant' => $enseignant,
+        ]);
+    }
+
     #[Route('/', name: 'app_enseignant_index', methods: ['GET', 'POST'])]
     public function index(
         EnseignantRepository $enseignantRepository,
@@ -29,6 +50,17 @@ class EnseignantController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        // If user is a teacher, redirect to dashboard
+        if ($authChecker->isEnseignant()) {
+            return $this->redirectToRoute('app_enseignant_dashboard');
+        }
+
+        // Only admins can see the teacher list
+        if (!$authChecker->isAdmin()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux administrateurs.');
+            return $this->redirectToRoute('app_home');
+        }
+
         // Get search criteria from request
         $criteria = [];
         if ($request->getMethod() === 'POST') {
@@ -40,18 +72,22 @@ class EnseignantController extends AbstractController
         // Get filter options
         $filterOptions = $searchService->getDistinctValues('enseignant', $enseignantRepository);
 
-        // Perform search if any criteria, otherwise get all
-        $enseignants = !empty(array_filter($criteria))
-            ? $searchService->searchEnseignants($criteria, $enseignantRepository)
-            : $enseignantRepository->findAll();
+        // Perform search if any criteria, otherwise get with pagination
+        if (!empty(array_filter($criteria))) {
+            $enseignants = $searchService->searchEnseignants($criteria, $enseignantRepository);
+        } else {
+            // Use pagination for performance
+            $limit = 20;
+            $page = max(1, (int) $request->query->get('page', 1));
+            $offset = ($page - 1) * $limit;
+            $enseignants = $enseignantRepository->findBy([], ['dateCreation' => 'DESC'], $limit, $offset);
+        }
 
-        return $this->render('enseignant/index.html.twig', [
-            'enseignants' => $enseignants,
-            'criteria' => $criteria,
-            'specialites' => $filterOptions['specialites'] ?? [],
-            'diplomes' => $filterOptions['diplomes'] ?? [],
-            'contrats' => $filterOptions['contrats'] ?? [],
-        ]);
+        // Get total count for pagination info
+        $totalEnseignants = $enseignantRepository->count([]);
+
+        // Since we want all users in one list, redirect to utilisateurs page
+        return $this->redirectToRoute('app_administrateur_utilisateurs');
     }
 
     #[Route('/new', name: 'app_enseignant_new', methods: ['GET', 'POST'])]
@@ -80,9 +116,9 @@ class EnseignantController extends AbstractController
             return $this->redirectToRoute('app_enseignant_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('enseignant/new.html.twig', [
+        return $this->render('admin/enseignant_new.html.twig', [
             'enseignant' => $enseignant,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -125,9 +161,9 @@ class EnseignantController extends AbstractController
             return $this->redirectToRoute('app_enseignant_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('enseignant/edit.html.twig', [
+        return $this->render('admin/enseignant_edit.html.twig', [
             'enseignant' => $enseignant,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 

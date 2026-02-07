@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Edit Profile - Eduport</title>
+
+    <!-- Meta Tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Webestica.com">
+    <meta name="description" content="Eduport- LMS, Education and Course Theme">
+
+    <!-- Dark mode -->
+    <script>
+        const storedTheme = localStorage.getItem('theme')
+
+        const getPreferredTheme = () => {
+            if (storedTheme) {
+                return storedTheme
+            }
+            return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'light'
+        }
+
+        const setTheme = function (theme) {
+            if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-bs-theme', 'dark')
+            } else {
+                document.documentElement.setAttribute('data-bs-theme', theme)
+            }
+        }
+
+        setTheme(getPreferredTheme())
+
+        window.addEventListener('DOMContentLoaded', () => {
+            var el = document.querySelector('.theme-icon-active');
+            if(el != 'undefined' && el != null) {
+                const showActiveTheme = theme => {
+                    const activeThemeIcon = document.querySelector('.theme-icon-active use')
+                    const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+                    const svgOfActiveBtn = btnToActive.querySelector('.mode-switch use').getAttribute('href')
+
+                    document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+                        element.classList.remove('active')
+                    })
+
+                    btnToActive.classList.add('active')
+                    activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+                }
+
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if (storedTheme !== 'light' || storedTheme !== 'dark') {
+                        setTheme(getPreferredTheme())
+                    }
+                })
+
+                showActiveTheme(getPreferredTheme())
+
+                document.querySelectorAll('[data-bs-theme-value]')
+                    .forEach(toggle => {
+                        toggle.addEventListener('click', () => {
+                            const theme = toggle.getAttribute('data-bs-theme-value')
+                            localStorage.setItem('theme', theme)
+                            setTheme(theme)
+                            showActiveTheme(theme)
+                        })
+                    })
+
+            }
+        })
+
+    </script>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;display=swap">
+
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" type="text/css" href="/assets/vendor/font-awesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/vendor/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" type="text/css" href="/assets/vendor/choices/css/choices.min.css">
+
+    <!-- Theme CSS -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
+
+    <style>
+        .avatar-img {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .bg-blue {
+            background-color: #667eea !important;
+        }
+        .avatar-initials {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        .bg-primary-light {
+            background-color: rgba(102, 126, 234, 0.1) !important;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Header START -->
+<header class="navbar-light navbar-sticky">
+    <!-- Logo Nav START -->
+    <nav class="navbar navbar-expand-xl">
+        <div class="container">
+            <!-- Logo START -->
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="/assets/images/logo.svg" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" src="/assets/images/logo-light.svg" alt="logo">
+            </a>
+            <!-- Logo END -->
+
+            <!-- Responsive navbar toggler -->
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-animation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+
+            <!-- Main navbar START -->
+            <div class="navbar-collapse w-100 collapse" id="navbarCollapse">
+                <!-- Nav Main menu START -->
+                <ul class="navbar-nav navbar-nav-scroll mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_home') }}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_student_profile') }}">Mon Profil</a>
+                    </li>
+                </ul>
+                <!-- Nav Main menu END -->
+
+                <!-- Profile START -->
+                <div class="dropdown ms-1 ms-lg-0">
+                    <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            {{ student.prenom|first|upper }}{{ student.nom|first|upper }}
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
+                        <!-- Profile info -->
+                        <li class="px-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <!-- Avatar -->
+                                <div class="avatar me-3">
+                                    <div class="avatar-img rounded-circle shadow bg-primary text-white d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                        {{ student.prenom|first|upper }}{{ student.nom|first|upper }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <a class="h6" href="{{ path('app_student_profile') }}">{{ student.prenom }} {{ student.nom }}</a>
+                                    <p class="small m-0">{{ student.email }}</p>
+                                    <p class="small m-0 text-muted">Étudiant</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li> <hr class="dropdown-divider"></li>
+                        <!-- Links -->
+                        <li><a class="dropdown-item" href="{{ path('app_student_profile') }}"><i class="bi bi-person fa-fw me-2"></i>Mon Profil</a></li>
+                        <li><a class="dropdown-item" href="{{ path('app_student_edit_profile') }}"><i class="bi bi-pencil-square fa-fw me-2"></i>Modifier Profil</a></li>
+                        <li><a class="dropdown-item" href="{{ path('app_change_password') }}"><i class="bi bi-key fa-fw me-2"></i>Changer Mot de Passe</a></li>
+                        <li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout') }}"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </div>
+                <!-- Profile START -->
+            </div>
+            <!-- Main navbar END -->
+        </div>
+    </nav>
+    <!-- Logo Nav END -->
+</header>
+<!-- Header END -->
+
+<!-- **************** MAIN CONTENT START **************** -->
+<main>
+
+    <!-- =======================
+    Page Banner START -->
+    <section class="pt-0">
+        <div class="container-fluid px-0">
+            <div class="card bg-blue h-100px h-md-200px rounded-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            </div>
+        </div>
+        <div class="container mt-n4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card bg-transparent card-body pb-0 px-0 mt-2 mt-sm-0">
+                        <div class="row d-sm-flex justify-sm-content-between mt-2 mt-md-0">
+                            <!-- Avatar -->
+                            <div class="col-auto">
+                                <div class="avatar avatar-xxl position-relative mt-n3">
+                                    <div class="avatar-img rounded-circle border border-white border-3 shadow bg-primary text-white d-flex align-items-center justify-content-center" style="width: 120px; height: 120px; font-size: 3rem;">
+                                        {{ student.prenom|first|upper }}{{ student.nom|first|upper }}
+                                    </div>
+                                    <span class="badge text-bg-success rounded-pill position-absolute top-50 start-100 translate-middle mt-4 mt-md-5 ms-n3 px-md-3">{{ student.niveauEtude }}</span>
+                                </div>
+                            </div>
+                            <!-- Profile info -->
+                            <div class="col d-sm-flex justify-content-between align-items-center">
+                                <div>
+                                    <h1 class="my-1 fs-4">{{ student.prenom }} {{ student.nom }}</h1>
+                                    <ul class="list-inline mb-0">
+                                        <li class="list-inline-item me-3 mb-1 mb-sm-0">
+                                            <span class="h6">{{ student.matricule }}</span>
+                                            <span class="text-body fw-light">Matricule</span>
+                                        </li>
+                                        <li class="list-inline-item me-3 mb-1 mb-sm-0">
+                                            <span class="h6">{{ student.niveauEtude }}</span>
+                                            <span class="text-body fw-light">Niveau</span>
+                                        </li>
+                                        <li class="list-inline-item me-3 mb-1 mb-sm-0">
+                                            <span class="h6">{{ student.specialisation }}</span>
+                                            <span class="text-body fw-light">Spécialisation</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <!-- Button -->
+                                <div class="mt-2 mt-sm-0">
+                                    <a href="{{ path('app_student_profile') }}" class="btn btn-outline-primary mb-0">Voir mon profil</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced filter responsive toggler START -->
+                    <!-- Divider -->
+                    <hr class="d-xl-none">
+                    <div class="col-12 col-xl-3 d-flex justify-content-between align-items-center">
+                        <a class="h6 mb-0 fw-bold d-xl-none" href="#">Menu</a>
+                        <button class="btn btn-primary d-xl-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+                            <i class="fas fa-sliders-h"></i>
+                        </button>
+                    </div>
+                    <!-- Advanced filter responsive toggler END -->
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- =======================
+    Page Banner END -->
+
+    <!-- =======================
+    Page content START -->
+    <section class="pt-0">
+        <div class="container">
+            <div class="row">
+
+                <!-- Left sidebar START -->
+                <div class="col-xl-3">
+                    <!-- Responsive offcanvas body START -->
+                    <div class="offcanvas-xl offcanvas-end" tabindex="-1" id="offcanvasSidebar">
+                        <!-- Offcanvas header -->
+                        <div class="offcanvas-header bg-light">
+                            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu Étudiant</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasSidebar" aria-label="Close"></button>
+                        </div>
+                        <!-- Offcanvas body -->
+                        <div class="offcanvas-body p-3 p-xl-0">
+                            <div class="bg-dark border rounded-3 p-3 w-100">
+                                <!-- Dashboard menu -->
+                                <div class="list-group list-group-dark list-group-borderless collapse-list">
+                                    <a class="list-group-item" href="#"><i class="bi bi-ui-checks-grid fa-fw me-2"></i>Tableau de Bord</a>
+                                    <a class="list-group-item" href="#"><i class="bi bi-book fa-fw me-2"></i>Mes Cours</a>
+                                    <a class="list-group-item" href="#"><i class="bi bi-clipboard-data fa-fw me-2"></i>Mes Notes</a>
+                                    <a class="list-group-item" href="{{ path('app_student_profile') }}"><i class="bi bi-person fa-fw me-2"></i>Mon Profil</a>
+                                    <a class="list-group-item active" href="{{ path('app_student_edit_profile') }}"><i class="bi bi-pencil-square fa-fw me-2"></i>Modifier Profil</a>
+                                    <a class="list-group-item" href="{{ path('app_change_password') }}"><i class="bi bi-key fa-fw me-2"></i>Changer Mot de Passe</a>
+                                    <a class="list-group-item" href="#"><i class="bi bi-calendar-event fa-fw me-2"></i>Emploi du Temps</a>
+                                    <a class="list-group-item" href="#"><i class="bi bi-chat-dots fa-fw me-2"></i>Messagerie</a>
+                                    <a class="list-group-item text-danger bg-danger-soft-hover" href="{{ path('app_logout') }}"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Responsive offcanvas body END -->
+                </div>
+                <!-- Left sidebar END -->
+
+                <!-- Main content START -->
+                <div class="col-xl-9">
+                    <!-- Card START -->
+                    <div class="card border">
+                        <!-- Card header -->
+                        <div class="card-header border-bottom">
+                            <h4 class="card-header-title">Modifier mon profil</h4>
+                        </div>
+
+                        <!-- Card body START -->
+                        <div class="card-body">
+                            {{ form_start(form, {'attr': {'class': 'row g-4'}}) }}
+
+                            <!-- Flash messages -->
+                            {% for message in app.flashes('success') %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+
+                            {% for message in app.flashes('error') %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+
+                            <!-- Personal info START -->
+                            <div class="col-12">
+                                <h5 class="mb-0">Informations personnelles</h5>
+                            </div>
+
+                            <!-- First name -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.prenom, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}
+                                    <div class="form-text text-danger">
+                                        {{ form_errors(form.prenom) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Last name -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                                    <div class="form-text text-danger">
+                                        {{ form_errors(form.nom) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                                    <div class="form-text text-danger">
+                                        {{ form_errors(form.email) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Matricule (readonly) -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Matricule</label>
+                                    <input type="text" class="form-control" value="{{ student.matricule }}" readonly>
+                                    <div class="form-text">Le matricule ne peut pas être modifié</div>
+                                </div>
+                            </div>
+
+                            <!-- Date of birth -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.dateNaissance, 'Date de naissance', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.dateNaissance, {'attr': {'class': 'form-control'}}) }}
+                                    <div class="form-text text-danger">
+                                        {{ form_errors(form.dateNaissance) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Telephone -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.telephone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.telephone, {'attr': {'class': 'form-control'}}) }}
+                                    <div class="form-text text-danger">
+                                        {{ form_errors(form.telephone) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Academic info START -->
+                            <div class="col-12">
+                                <h5 class="mb-0 mt-4">Informations académiques</h5>
+                            </div>
+
+                            <!-- Niveau d'étude -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.niveauEtude, 'Niveau d\'étude', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.niveauEtude, {'attr': {'class': 'form-select'}}) }}
+                                    <div class="form-text text-danger">
+                                        {{ form_errors(form.niveauEtude) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Specialisation -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.specialisation, 'Spécialisation', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.specialisation, {'attr': {'class': 'form-control'}}) }}
+                                    <div class="form-text text-danger">
+                                        {{ form_errors(form.specialisation) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    {{ form_label(form.adresse, 'Adresse', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.adresse, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                                    <div class="form-text text-danger">
+                                        {{ form_errors(form.adresse) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Password section (optional) -->
+                            <div class="col-12">
+                                <h5 class="mb-0 mt-4">Changer le mot de passe (optionnel)</h5>
+                                <p class="form-text">Laissez vide si vous ne voulez pas changer le mot de passe</p>
+                            </div>
+
+                            <!-- New Password -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.motDePasse, 'Nouveau mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.motDePasse, {'attr': {'class': 'form-control', 'placeholder': 'Laisser vide pour ne pas changer'}}) }}
+                                    <div class="form-text text-danger">
+                                        {{ form_errors(form.motDePasse) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Confirmer le mot de passe</label>
+                                    <input type="password" class="form-control" name="confirm_password" placeholder="Confirmer le nouveau mot de passe">
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="col-12 text-end">
+                                <a href="{{ path('app_student_profile') }}" class="btn btn-light me-2">Annuler</a>
+                                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                            </div>
+
+                            {{ form_end(form) }}
+                        </div>
+                        <!-- Card body END -->
+                    </div>
+                    <!-- Card END -->
+                </div>
+                <!-- Main content END -->
+            </div><!-- Row END -->
+        </div>
+    </section>
+    <!-- =======================
+    Page content END -->
+
+</main>
+<!-- **************** MAIN CONTENT END **************** -->
+
+<!-- =======================
+Footer START -->
+<footer class="bg-dark p-3">
+    <div class="container">
+        <div class="row align-items-center">
+            <!-- Widget -->
+            <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
+                <!-- Logo START -->
+                <a href="{{ path('app_home') }}"> <img class="h-20px" src="/assets/images/logo-light.svg" alt="logo"> </a>
+            </div>
+
+            <!-- Widget -->
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="text-center text-white text-primary-hover">
+                    Copyrights ©2023 Eduport. Plateforme Étudiante.
+                </div>
+            </div>
+            <!-- Widget -->
+            <div class="col-md-4">
+                <ul class="list-inline mb-0 text-center text-md-end">
+                    <li class="list-inline-item ms-2"><a href="#"><i class="text-white fab fa-facebook"></i></a></li>
+                    <li class="list-inline-item ms-2"><a href="#"><i class="text-white fab fa-instagram"></i></a></li>
+                    <li class="list-inline-item ms-2"><a href="#"><i class="text-white fab fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+<!-- =======================
+Footer END -->
+
+<!-- Back to top -->
+<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
+
+<!-- Bootstrap JS -->
+<script src="/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Vendors -->
+<script src="/assets/vendor/choices/js/choices.min.js"></script>
+
+<!-- Template Functions -->
+<script src="/assets/js/functions.js"></script>
+
+<script>
+    // JavaScript pour la confirmation du mot de passe
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const passwordField = form.querySelector('input[name="etudiant[motDePasse]"]');
+        const confirmPasswordField = form.querySelector('input[name="confirm_password"]');
+
+        form.addEventListener('submit', function(e) {
+            const password = passwordField.value;
+            const confirmPassword = confirmPasswordField.value;
+
+            // Si un mot de passe est saisi mais pas confirmé
+            if (password && !confirmPassword) {
+                e.preventDefault();
+                alert('Veuillez confirmer votre mot de passe.');
+                confirmPasswordField.focus();
+                return false;
+            }
+
+            // Si les mots de passe ne correspondent pas
+            if (password && confirmPassword && password !== confirmPassword) {
+                e.preventDefault();
+                alert('Les mots de passe ne correspondent pas.');
+                confirmPasswordField.focus();
+                return false;
+            }
+
+            // Si le mot de passe est trop court
+            if (password && password.length < 8) {
+                e.preventDefault();
+                alert('Le mot de passe doit contenir au moins 8 caractères.');
+                passwordField.focus();
+                return false;
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

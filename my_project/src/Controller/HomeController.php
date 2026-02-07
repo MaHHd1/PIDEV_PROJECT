@@ -9,7 +9,6 @@ use App\Service\AuthChecker;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
 
 class HomeController extends AbstractController
 {
@@ -18,20 +17,30 @@ class HomeController extends AbstractController
         EtudiantRepository $etudiantRepo,
         EnseignantRepository $enseignantRepo,
         AdministrateurRepository $adminRepo,
-        Request $request  // Add Request parameter
+        AuthChecker $authChecker
     ): Response
     {
-        $session = $request->getSession();
-
-        // You can still check if logged in, but this template will handle both cases
+        // Use count() instead of count(findAll()) for performance
         $stats = [
-            'etudiants' => count($etudiantRepo->findAll()),
-            'enseignants' => count($enseignantRepo->findAll()),
-            'administrateurs' => count($adminRepo->findAll()),
+            'etudiants' => $etudiantRepo->count([]),
+            'enseignants' => $enseignantRepo->count([]),
+            'administrateurs' => $adminRepo->count([]),
         ];
+
+        // Pass user info to template
+        $user = $authChecker->getCurrentUser();
+
+        // Check user type using AuthChecker
+        $isAdmin = $authChecker->isAdmin();
+        $isEnseignant = $authChecker->isEnseignant();
+        $isEtudiant = $authChecker->isEtudiant();
 
         return $this->render('home/index.html.twig', [
             'stats' => $stats,
+            'current_user' => $user,  // This should be null when not logged in
+            'is_admin' => $isAdmin,
+            'is_enseignant' => $isEnseignant,
+            'is_etudiant' => $isEtudiant,
         ]);
     }
 }
