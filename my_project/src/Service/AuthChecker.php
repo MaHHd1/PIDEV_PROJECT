@@ -116,6 +116,10 @@ class AuthChecker
 
     public function isAdmin(): bool
     {
+        if (!$this->isLoggedIn()) {
+            return false;
+        }
+
         $user = $this->getCurrentUser();
         return $user instanceof Administrateur;
     }

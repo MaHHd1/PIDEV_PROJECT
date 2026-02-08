@@ -1,4 +1,4 @@
-{% extends 'admin/base_admin.html.twig' %}
+{% extends 'admin/admin_base.html.twig' %}
 
 {% block title %}Détails Utilisateur - Eduport{% endblock %}
 
@@ -13,7 +13,7 @@
                         <ol class="breadcrumb mb-0">
                             <li class="breadcrumb-item"><a href="{{ path('app_administrateur_dashboard') }}">Dashboard</a></li>
                             <li class="breadcrumb-item"><a href="{{ path('app_administrateur_utilisateurs') }}">Liste des utilisateurs</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">{{ user.nomComplet }}</li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ user.prenom }} {{ user.nom }}</li>
                         </ol>
                     </nav>
                 </div>
@@ -50,7 +50,10 @@
                             {% endif %}
                         </span>
                         <p class="mb-0">{{ user.email }}</p>
-                        {% if user.telephone %}
+                        <!-- Only show telephone for etudiant and administrateur -->
+                        {% if type == 'etudiant' and user.telephone %}
+                            <p class="mb-0"><i class="bi bi-telephone me-1"></i>{{ user.telephone }}</p>
+                        {% elseif type == 'administrateur' and user.telephone %}
                             <p class="mb-0"><i class="bi bi-telephone me-1"></i>{{ user.telephone }}</p>
                         {% endif %}
                     </div>
@@ -77,6 +80,29 @@
                                 {{ user.statut|capitalize }}
                             {% endif %}
                         </span>
+                    </div>
+                </div>
+                <div class="card-footer border-top p-3">
+                    <div class="d-grid gap-2">
+                        <!-- Modifier button -->
+                        {% if type == 'etudiant' %}
+                            <a href="{{ path('app_etudiant_edit', {'id': user.id}) }}" class="btn btn-success">
+                                <i class="bi bi-pencil me-1"></i>Modifier l'étudiant
+                            </a>
+                        {% elseif type == 'enseignant' %}
+                            <a href="{{ path('app_enseignant_edit', {'id': user.id}) }}" class="btn btn-warning">
+                                <i class="bi bi-pencil me-1"></i>Modifier l'enseignant
+                            </a>
+                        {% else %}
+                            <a href="{{ path('app_administrateur_edit', {'id': user.id}) }}" class="btn btn-primary">
+                                <i class="bi bi-pencil me-1"></i>Modifier l'administrateur
+                            </a>
+                        {% endif %}
+
+                        <!-- Supprimer button -->
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ user.id }}">
+                            <i class="bi bi-trash me-1"></i>Supprimer l'utilisateur
+                        </button>
                     </div>
                 </div>
             </div>
@@ -106,19 +132,34 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Date de naissance</label>
-                                <p>{{ user.dateNaissance|date('d/m/Y') }} ({{ user.age }} ans)</p>
+                                <p>
+                                    {% if user.dateNaissance %}
+                                        {{ user.dateNaissance|date('d/m/Y') }}
+                                        {% if user.age is defined %}
+                                            ({{ user.age }} ans)
+                                        {% endif %}
+                                    {% else %}
+                                        Non spécifiée
+                                    {% endif %}
+                                </p>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Date d'inscription</label>
-                                <p>{{ user.dateInscription|date('d/m/Y') }}</p>
+                                <p>
+                                    {% if user.dateInscription %}
+                                        {{ user.dateInscription|date('d/m/Y') }}
+                                    {% else %}
+                                        Non spécifiée
+                                    {% endif %}
+                                </p>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Téléphone</label>
-                                <p>{{ user.telephone }}</p>
+                                <p>{{ user.telephone|default('Non spécifié') }}</p>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-bold">Adresse</label>
-                                <p>{{ user.adresse }}</p>
+                                <p>{{ user.adresse|default('Non spécifiée') }}</p>
                             </div>
                         </div>
 
@@ -170,7 +211,13 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Date de nomination</label>
-                                <p>{{ user.dateNomination|date('d/m/Y') }}</p>
+                                <p>
+                                    {% if user.dateNomination %}
+                                        {{ user.dateNomination|date('d/m/Y') }}
+                                    {% else %}
+                                        Non spécifiée
+                                    {% endif %}
+                                </p>
                             </div>
                             {% if user.telephone %}
                                 <div class="col-md-6">
@@ -181,29 +228,36 @@
                         </div>
                     {% endif %}
                 </div>
-                <div class="card-footer border-top p-4">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            {% if type == 'etudiant' %}
-                                <a href="{{ path('app_etudiant_edit', {'id': user.id}) }}" class="btn btn-primary">
-                                    <i class="bi bi-pencil me-1"></i>Modifier l'étudiant
-                                </a>
-                            {% elseif type == 'enseignant' %}
-                                <a href="{{ path('app_enseignant_edit', {'id': user.id}) }}" class="btn btn-primary">
-                                    <i class="bi bi-pencil me-1"></i>Modifier l'enseignant
-                                </a>
-                            {% else %}
-                                <a href="{{ path('app_administrateur_edit', {'id': user.id}) }}" class="btn btn-primary">
-                                    <i class="bi bi-pencil me-1"></i>Modifier l'administrateur
-                                </a>
-                            {% endif %}
-                        </div>
-                        <div>
-                            <a href="{{ path('app_administrateur_utilisateurs') }}" class="btn btn-light">
-                                <i class="bi bi-arrow-left me-1"></i>Retour à la liste
-                            </a>
-                        </div>
-                    </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ user.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel{{ user.id }}">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{{ user.prenom }} {{ user.nom }}</strong> ({{ user.email }}) ?</p>
+                    <p class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form method="post" action="
+                        {% if type == 'etudiant' %}
+                            {{ path('app_etudiant_delete', {'id': user.id}) }}
+                        {% elseif type == 'enseignant' %}
+                            {{ path('app_enseignant_delete', {'id': user.id}) }}
+                        {% else %}
+                            {{ path('app_administrateur_delete', {'id': user.id}) }}
+                        {% endif %}
+                    ">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
                 </div>
             </div>
         </div>

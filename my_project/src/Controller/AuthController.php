@@ -2,14 +2,26 @@
 
 namespace App\Controller;
 
+use App\Form\LoginType;
+use App\Form\ForgotPasswordType;
+use App\Form\ResetPasswordType;
+use App\Form\ChangePasswordType;
 use App\Service\AuthChecker;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AuthController extends AbstractController
 {
+    private $requestStack;
+
+    public function __construct(RequestStack $requestStack)
+    {
+        $this->requestStack = $requestStack;
+    }
+
     #[Route('/login', name: 'app_login')]
     public function login(Request $request, AuthChecker $authChecker): Response
     {
@@ -19,35 +31,40 @@ class AuthController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
+        $form = $this->createForm(LoginType::class);
+        $form->handleRequest($request);
+
+        // Get any authentication errors from the session
         $error = null;
-        $email = '';
+        $session = $this->requestStack->getSession();
+        $lastError = $session->get('_security.last_error');
+        if ($lastError) {
+            $error = $lastError;
+            $session->remove('_security.last_error');
+        }
 
-        if ($request->isMethod('POST')) {
-            $email = trim($request->request->get('email', ''));
-            $password = trim($request->request->get('password', ''));
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $email = $data['email'];
+            $password = $data['password'];
 
-            // PHP validation
-            if (empty($email)) {
-                $error = 'L\'email est requis.';
-            } elseif (empty($password)) {
-                $error = 'Le mot de passe est requis.';
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $error = 'Format d\'email invalide.';
+            $user = $authChecker->login($email, $password);
+
+            if ($user) {
+                $this->addFlash('success', 'Connexion réussie ! Bienvenue ' . $user->getPrenom() . '!');
+                return $this->redirectToRoute('app_home');
             } else {
-                $user = $authChecker->login($email, $password);
-
-                if ($user) {
-                    $this->addFlash('success', 'Connexion réussie ! Bienvenue ' . $user->getPrenom() . '!');
-                    return $this->redirectToRoute('app_home');
-                } else {
-                    $error = 'Email ou mot de passe incorrect.';
-                }
+                // Set error for template
+                $error = 'Email ou mot de passe incorrect.';
             }
+        } elseif ($form->isSubmitted()) {
+            // Form has validation errors
+            $error = 'Veuillez vérifier les informations saisies.';
         }
 
         return $this->render('auth/login.html.twig', [
-            'error' => $error,
-            'email' => $email
+            'form' => $form->createView(),
+            'error' => $error
         ]);
     }
 
@@ -67,18 +84,17 @@ class AuthController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
+        $form = $this->createForm(ForgotPasswordType::class);
+        $form->handleRequest($request);
+
         $message = null;
         $error = null;
 
-        if ($request->isMethod('POST')) {
-            $email = trim($request->request->get('email', ''));
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $data = $form->getData();
+                $email = $data['email'];
 
-            // PHP validation
-            if (empty($email)) {
-                $error = 'L\'email est requis.';
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $error = 'Format d\'email invalide.';
-            } else {
                 $result = $authChecker->createPasswordReset($email);
 
                 if ($result) {
@@ -93,10 +109,13 @@ class AuthController extends AbstractController
                         'text' => 'Si votre email est enregistré, vous recevrez un lien de réinitialisation.'
                     ];
                 }
+            } else {
+                $error = 'Veuillez vérifier les informations saisies.';
             }
         }
 
         return $this->render('auth/forgot_password.html.twig', [
+            'form' => $form->createView(),
             'message' => $message,
             'error' => $error
         ]);
@@ -117,37 +136,30 @@ class AuthController extends AbstractController
             return $this->redirectToRoute('app_forgot_password');
         }
 
+        $form = $this->createForm(ResetPasswordType::class);
+        $form->handleRequest($request);
+
         $error = null;
 
-        if ($request->isMethod('POST')) {
-            $password = trim($request->request->get('password', ''));
-            $confirmPassword = trim($request->request->get('confirm_password', ''));
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $password = $data['password'];
 
-            // PHP validation
-            if (empty($password)) {
-                $error = 'Le mot de passe est requis.';
-            } elseif (empty($confirmPassword)) {
-                $error = 'La confirmation du mot de passe est requise.';
-            } elseif ($password !== $confirmPassword) {
-                $error = 'Les mots de passe ne correspondent pas.';
-            } elseif (strlen($password) < 8) {
-                $error = 'Le mot de passe doit avoir au moins 8 caractères.';
+            $success = $authChecker->resetPasswordWithToken($token, $password);
+
+            if ($success) {
+                $this->addFlash('success', 'Mot de passe changé avec succès. Connectez-vous.');
+                return $this->redirectToRoute('app_login');
             } else {
-                $success = $authChecker->resetPasswordWithToken($token, $password);
-
-                if ($success) {
-                    $this->addFlash('success', 'Mot de passe changé avec succès. Connectez-vous.');
-                    return $this->redirectToRoute('app_login');
-                } else {
-                    $error = 'Erreur lors de la réinitialisation. Réessayez.';
-                }
+                $error = 'Erreur lors de la réinitialisation. Réessayez.';
             }
         }
 
         return $this->render('auth/reset_password.html.twig', [
+            'form' => $form->createView(),
             'token' => $token,
-            'error' => $error,
-            'user' => $user
+            'user' => $user,
+            'error' => $error
         ]);
     }
 
@@ -161,39 +173,31 @@ class AuthController extends AbstractController
         }
 
         $user = $authChecker->getCurrentUser();
+
+        $form = $this->createForm(ChangePasswordType::class);
+        $form->handleRequest($request);
+
         $error = null;
 
-        if ($request->isMethod('POST')) {
-            $currentPassword = trim($request->request->get('current_password', ''));
-            $newPassword = trim($request->request->get('new_password', ''));
-            $confirmPassword = trim($request->request->get('confirm_password', ''));
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $currentPassword = $data['currentPassword'];
+            $newPassword = $data['newPassword'];
 
-            // PHP validation
-            if (empty($currentPassword)) {
-                $error = 'Le mot de passe actuel est requis.';
-            } elseif (empty($newPassword)) {
-                $error = 'Le nouveau mot de passe est requis.';
-            } elseif (empty($confirmPassword)) {
-                $error = 'La confirmation du mot de passe est requise.';
-            } elseif ($newPassword !== $confirmPassword) {
-                $error = 'Les nouveaux mots de passe ne correspondent pas.';
-            } elseif (strlen($newPassword) < 8) {
-                $error = 'Le mot de passe doit avoir au moins 8 caractères.';
+            $success = $authChecker->changePassword($user, $currentPassword, $newPassword);
+
+            if ($success) {
+                $this->addFlash('success', 'Mot de passe changé avec succès.');
+                return $this->redirectToRoute('app_home');
             } else {
-                $success = $authChecker->changePassword($user, $currentPassword, $newPassword);
-
-                if ($success) {
-                    $this->addFlash('success', 'Mot de passe changé avec succès.');
-                    return $this->redirectToRoute('app_home');
-                } else {
-                    $error = 'Mot de passe actuel incorrect.';
-                }
+                $error = 'Mot de passe actuel incorrect.';
             }
         }
 
         return $this->render('auth/change_password.html.twig', [
-            'error' => $error,
-            'user' => $user
+            'form' => $form->createView(),
+            'user' => $user,
+            'error' => $error
         ]);
     }
 

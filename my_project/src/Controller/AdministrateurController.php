@@ -14,10 +14,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 #[Route('/administrateur')]
 class AdministrateurController extends AbstractController
@@ -94,6 +90,11 @@ class AdministrateurController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
+        // Get current user info
+        $user = $authChecker->getCurrentUser();
+        $userName = $user ? $user->getPrenom() . ' ' . $user->getNom() : null;
+        $userEmail = $user ? $user->getEmail() : null;
+
         // Get statistics efficiently
         $totalEtudiants = $etudiantRepository->count([]);
         $totalEnseignants = $enseignantRepository->count([]);
@@ -116,6 +117,11 @@ class AdministrateurController extends AbstractController
             'recentEtudiants' => $recentEtudiants,
             'recentEnseignants' => $recentEnseignants,
             'recentAdmins' => $recentAdmins,
+            'user_name' => $userName,
+            'user_email' => $userEmail,
+            'is_admin' => true,
+            'is_enseignant' => false,
+            'is_etudiant' => false,
         ]);
     }
 
@@ -151,7 +157,16 @@ class AdministrateurController extends AbstractController
 
             $this->addFlash('success', 'Administrateur créé avec succès!');
 
-            return $this->redirectToRoute('app_administrateur_utilisateurs', [], Response::HTTP_SEE_OTHER);
+            // If "save and add another" button was clicked, stay on the same page
+            if ($request->request->has('save_and_new')) {
+                return $this->redirectToRoute('app_administrateur_new');
+            }
+
+            // Otherwise redirect to the show page
+            return $this->redirectToRoute('app_administrateur_utilisateur_show', [
+                'type' => 'administrateur',
+                'id' => $administrateur->getId(),
+            ], Response::HTTP_SEE_OTHER);
         }
 
         // Render base_admin with the form content
@@ -368,9 +383,13 @@ class AdministrateurController extends AbstractController
         return $this->redirectToRoute('app_administrateur_profile');
     }
 
-    // ========== GENERIC {id} ROUTES MUST BE LAST ==========
+    // ========== GENERIC {id} ROUTES ==========
     #[Route('/{id}', name: 'app_administrateur_show', methods: ['GET'], requirements: ['id' => '\d+'])]
-    public function show(Administrateur $administrateur, AuthChecker $authChecker): Response
+    public function show(
+        int $id,
+        AdministrateurRepository $administrateurRepository,
+        AuthChecker $authChecker
+    ): Response
     {
         // Authentication check
         if (!$authChecker->isLoggedIn()) {
@@ -381,6 +400,13 @@ class AdministrateurController extends AbstractController
         if (!$authChecker->isAdmin()) {
             $this->addFlash('error', 'Accès non autorisé.');
             return $this->redirectToRoute('app_home');
+        }
+
+        $administrateur = $administrateurRepository->find($id);
+
+        if (!$administrateur) {
+            $this->addFlash('error', 'Administrateur non trouvé.');
+            return $this->redirectToRoute('app_administrateur_utilisateurs');
         }
 
         // Redirect to the combined user show page
@@ -390,8 +416,14 @@ class AdministrateurController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_administrateur_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Administrateur $administrateur, EntityManagerInterface $entityManager, AuthChecker $authChecker): Response
+    #[Route('/{id}/edit', name: 'app_administrateur_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    public function edit(
+        Request $request,
+        int $id,
+        AdministrateurRepository $administrateurRepository,
+        EntityManagerInterface $entityManager,
+        AuthChecker $authChecker
+    ): Response
     {
         // Authentication check
         if (!$authChecker->isLoggedIn()) {
@@ -402,6 +434,13 @@ class AdministrateurController extends AbstractController
         if (!$authChecker->isAdmin()) {
             $this->addFlash('error', 'Accès non autorisé.');
             return $this->redirectToRoute('app_home');
+        }
+
+        $administrateur = $administrateurRepository->find($id);
+
+        if (!$administrateur) {
+            $this->addFlash('error', 'Administrateur non trouvé.');
+            return $this->redirectToRoute('app_administrateur_utilisateurs');
         }
 
         $form = $this->createForm(AdministrateurType::class, $administrateur, ['is_edit' => true]);
@@ -419,6 +458,12 @@ class AdministrateurController extends AbstractController
 
             $this->addFlash('success', 'Administrateur modifié avec succès!');
 
+            // If "save and continue" button was clicked, stay on the same page
+            if ($request->request->has('save_and_continue')) {
+                return $this->redirectToRoute('app_administrateur_edit', ['id' => $administrateur->getId()]);
+            }
+
+            // Otherwise redirect to the show page
             return $this->redirectToRoute('app_administrateur_utilisateur_show', [
                 'type' => 'administrateur',
                 'id' => $administrateur->getId(),
@@ -432,9 +477,14 @@ class AdministrateurController extends AbstractController
         ]);
     }
 
-    // FIXED: Changed from '/{id}' to '/delete/{id}' to avoid route conflict
     #[Route('/delete/{id}', name: 'app_administrateur_delete', methods: ['POST'])]
-    public function delete(Request $request, Administrateur $administrateur, EntityManagerInterface $entityManager, AuthChecker $authChecker): Response
+    public function delete(
+        Request $request,
+        int $id,
+        AdministrateurRepository $administrateurRepository,
+        EntityManagerInterface $entityManager,
+        AuthChecker $authChecker
+    ): Response
     {
         // Authentication check
         if (!$authChecker->isLoggedIn()) {
@@ -447,11 +497,20 @@ class AdministrateurController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
+        $administrateur = $administrateurRepository->find($id);
+
+        if (!$administrateur) {
+            $this->addFlash('error', 'Administrateur non trouvé.');
+            return $this->redirectToRoute('app_administrateur_utilisateurs');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$administrateur->getId(), $request->request->get('_token'))) {
             $entityManager->remove($administrateur);
             $entityManager->flush();
 
             $this->addFlash('success', 'Administrateur supprimé avec succès!');
+        } else {
+            $this->addFlash('error', 'Token CSRF invalide.');
         }
 
         return $this->redirectToRoute('app_administrateur_utilisateurs', [], Response::HTTP_SEE_OTHER);

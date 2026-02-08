@@ -27,20 +27,29 @@ class HomeController extends AbstractController
             'administrateurs' => $adminRepo->count([]),
         ];
 
-        // Pass user info to template
+        // Get current user from AuthChecker
         $user = $authChecker->getCurrentUser();
 
-        // Check user type using AuthChecker
-        $isAdmin = $authChecker->isAdmin();
-        $isEnseignant = $authChecker->isEnseignant();
-        $isEtudiant = $authChecker->isEtudiant();
+        // Get user info for template
+        $userName = null;
+        $userEmail = null;
+        $userType = null;
+
+        if ($user) {
+            $userName = method_exists($user, 'getNomComplet') ? $user->getNomComplet() : ($user->getPrenom() . ' ' . $user->getNom());
+            $userEmail = $user->getEmail();
+            $userType = method_exists($user, 'getType') ? $user->getType() : 'unknown';
+        }
 
         return $this->render('home/index.html.twig', [
             'stats' => $stats,
-            'current_user' => $user,  // This should be null when not logged in
-            'is_admin' => $isAdmin,
-            'is_enseignant' => $isEnseignant,
-            'is_etudiant' => $isEtudiant,
+            'current_user' => $user,
+            'user_name' => $userName,
+            'user_email' => $userEmail,
+            'user_type' => $userType,
+            'is_admin' => $authChecker->isAdmin(),
+            'is_enseignant' => $authChecker->isEnseignant(),
+            'is_etudiant' => $authChecker->isEtudiant(),
         ]);
     }
 }

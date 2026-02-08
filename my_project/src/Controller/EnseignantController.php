@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Enseignant;
 use App\Form\EnseignantType;
+use App\Form\ChangePasswordType;
 use App\Repository\EnseignantRepository;
+use App\Repository\EtudiantRepository;
 use App\Service\AuthChecker;
 use App\Service\SearchService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -61,34 +63,11 @@ class EnseignantController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
-        // Get search criteria from request
-        $criteria = [];
-        if ($request->getMethod() === 'POST') {
-            $criteria = $request->request->all();
-        } else {
-            $criteria = $request->query->all();
-        }
-
-        // Get filter options
-        $filterOptions = $searchService->getDistinctValues('enseignant', $enseignantRepository);
-
-        // Perform search if any criteria, otherwise get with pagination
-        if (!empty(array_filter($criteria))) {
-            $enseignants = $searchService->searchEnseignants($criteria, $enseignantRepository);
-        } else {
-            // Use pagination for performance
-            $limit = 20;
-            $page = max(1, (int) $request->query->get('page', 1));
-            $offset = ($page - 1) * $limit;
-            $enseignants = $enseignantRepository->findBy([], ['dateCreation' => 'DESC'], $limit, $offset);
-        }
-
-        // Get total count for pagination info
-        $totalEnseignants = $enseignantRepository->count([]);
-
-        // Since we want all users in one list, redirect to utilisateurs page
+        // Redirect to the combined users list
         return $this->redirectToRoute('app_administrateur_utilisateurs');
     }
+
+    // ========== SPECIFIC ROUTES MUST BE ABOVE GENERIC {id} ROUTES ==========
 
     #[Route('/new', name: 'app_enseignant_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, AuthChecker $authChecker): Response
@@ -96,6 +75,12 @@ class EnseignantController extends AbstractController
         // Authentication check
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
+        }
+
+        // Only admins can create teachers
+        if (!$authChecker->isAdmin()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux administrateurs.');
+            return $this->redirectToRoute('app_home');
         }
 
         $enseignant = new Enseignant();
@@ -113,7 +98,16 @@ class EnseignantController extends AbstractController
 
             $this->addFlash('success', 'Enseignant créé avec succès!');
 
-            return $this->redirectToRoute('app_enseignant_index', [], Response::HTTP_SEE_OTHER);
+            // If "save and add another" button was clicked, stay on the same page
+            if ($request->request->has('save_and_new')) {
+                return $this->redirectToRoute('app_enseignant_new');
+            }
+
+            // Otherwise redirect to the show page
+            return $this->redirectToRoute('app_administrateur_utilisateur_show', [
+                'type' => 'enseignant',
+                'id' => $enseignant->getId(),
+            ], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('admin/enseignant_new.html.twig', [
@@ -122,12 +116,162 @@ class EnseignantController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_enseignant_show', methods: ['GET'])]
-    public function show(Enseignant $enseignant, AuthChecker $authChecker): Response
+    #[Route('/liste-etudiants', name: 'app_enseignant_liste_etudiants', methods: ['GET'])]
+    public function listeEtudiants(
+        EtudiantRepository $etudiantRepository,
+        AuthChecker $authChecker
+    ): Response
     {
         // Authentication check
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
+        }
+
+        // Check if user is a teacher
+        if (!$authChecker->isEnseignant()) {
+            $this->addFlash('error', 'Accès non autorisé.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $enseignant = $authChecker->getCurrentUser();
+
+        // Get all students (you might want to filter by teacher's courses)
+        $etudiants = $etudiantRepository->findBy([], ['nom' => 'ASC']);
+
+        return $this->render('enseignant/liste_etudiants.html.twig', [
+            'enseignant' => $enseignant,
+            'etudiants' => $etudiants,
+        ]);
+    }
+
+    #[Route('/edit-profile', name: 'app_enseignant_edit_profile', methods: ['GET', 'POST'])]
+    public function editProfile(
+        Request $request,
+        AuthChecker $authChecker,
+        EntityManagerInterface $entityManager
+    ): Response
+    {
+        // Authentication check
+        if (!$authChecker->isLoggedIn()) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Check if user is a teacher
+        if (!$authChecker->isEnseignant()) {
+            $this->addFlash('error', 'Accès non autorisé.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $enseignant = $authChecker->getCurrentUser();
+
+        // Create form using EnseignantType with is_edit option
+        $form = $this->createForm(EnseignantType::class, $enseignant, ['is_edit' => true]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                // Update password only if provided
+                if ($form->has('motDePasse') && $form->get('motDePasse')->getData()) {
+                    $plainPassword = $form->get('motDePasse')->getData();
+                    $hashedPassword = password_hash($plainPassword, PASSWORD_BCRYPT);
+                    $enseignant->setMotDePasse($hashedPassword);
+                }
+
+                $entityManager->flush();
+                $this->addFlash('success', 'Profil mis à jour avec succès !');
+
+                return $this->redirectToRoute('app_enseignant_edit_profile');
+            } else {
+                // Form has validation errors
+                $this->addFlash('error', 'Veuillez corriger les erreurs dans le formulaire.');
+            }
+        }
+
+        return $this->render('enseignant/edit_profile.html.twig', [
+            'enseignant' => $enseignant,
+            'edit_form' => $form->createView(), // Pass as 'edit_form'
+        ]);
+    }
+
+    #[Route('/changer-password', name: 'app_enseignant_changer_password', methods: ['GET', 'POST'])]
+    public function changerPassword(
+        Request $request,
+        AuthChecker $authChecker,
+        EntityManagerInterface $entityManager
+    ): Response
+    {
+        // Authentication check
+        if (!$authChecker->isLoggedIn()) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Check if user is a teacher
+        if (!$authChecker->isEnseignant()) {
+            $this->addFlash('error', 'Accès non autorisé.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $enseignant = $authChecker->getCurrentUser();
+
+        $form = $this->createForm(ChangePasswordType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                // Get the form data
+                $currentPassword = $form->get('currentPassword')->getData();
+                $newPassword = $form->get('newPassword')->getData();
+
+                // Verify current password
+                if (!password_verify($currentPassword, $enseignant->getMotDePasse())) {
+                    $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
+                } else {
+                    // Hash new password
+                    $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+                    $enseignant->setMotDePasse($hashedPassword);
+
+                    $entityManager->flush();
+                    $this->addFlash('success', 'Mot de passe changé avec succès !');
+
+                    return $this->redirectToRoute('app_enseignant_changer_password');
+                }
+            } else {
+                // Form has validation errors
+                $this->addFlash('error', 'Veuillez corriger les erreurs dans le formulaire.');
+            }
+        }
+
+        return $this->render('enseignant/changer_password.html.twig', [
+            'form' => $form->createView(),
+            'enseignant' => $enseignant,
+        ]);
+    }
+
+    // ========== GENERIC {id} ROUTES ==========
+
+    #[Route('/{id}', name: 'app_enseignant_show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function show(
+        int $id,
+        EnseignantRepository $enseignantRepository,
+        AuthChecker $authChecker
+    ): Response
+    {
+        // Authentication check
+        if (!$authChecker->isLoggedIn()) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Only admins can see teacher details
+        if (!$authChecker->isAdmin()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux administrateurs.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $enseignant = $enseignantRepository->find($id);
+
+        if (!$enseignant) {
+            $this->addFlash('error', 'Enseignant non trouvé.');
+            return $this->redirectToRoute('app_administrateur_utilisateurs');
         }
 
         return $this->render('enseignant/show.html.twig', [
@@ -135,12 +279,31 @@ class EnseignantController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_enseignant_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Enseignant $enseignant, EntityManagerInterface $entityManager, AuthChecker $authChecker): Response
+    #[Route('/{id}/edit', name: 'app_enseignant_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    public function edit(
+        Request $request,
+        int $id,
+        EnseignantRepository $enseignantRepository,
+        EntityManagerInterface $entityManager,
+        AuthChecker $authChecker
+    ): Response
     {
         // Authentication check
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
+        }
+
+        // Only admins can edit teachers
+        if (!$authChecker->isAdmin()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux administrateurs.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $enseignant = $enseignantRepository->find($id);
+
+        if (!$enseignant) {
+            $this->addFlash('error', 'Enseignant non trouvé.');
+            return $this->redirectToRoute('app_administrateur_utilisateurs');
         }
 
         $form = $this->createForm(EnseignantType::class, $enseignant, ['is_edit' => true]);
@@ -158,7 +321,16 @@ class EnseignantController extends AbstractController
 
             $this->addFlash('success', 'Enseignant modifié avec succès!');
 
-            return $this->redirectToRoute('app_enseignant_index', [], Response::HTTP_SEE_OTHER);
+            // If "save and continue" button was clicked, stay on the same page
+            if ($request->request->has('save_and_continue')) {
+                return $this->redirectToRoute('app_enseignant_edit', ['id' => $enseignant->getId()]);
+            }
+
+            // Otherwise redirect to the show page
+            return $this->redirectToRoute('app_administrateur_utilisateur_show', [
+                'type' => 'enseignant',
+                'id' => $enseignant->getId(),
+            ], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('admin/enseignant_edit.html.twig', [
@@ -167,12 +339,31 @@ class EnseignantController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_enseignant_delete', methods: ['POST'])]
-    public function delete(Request $request, Enseignant $enseignant, EntityManagerInterface $entityManager, AuthChecker $authChecker): Response
+    #[Route('/{id}', name: 'app_enseignant_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function delete(
+        Request $request,
+        int $id,
+        EnseignantRepository $enseignantRepository,
+        EntityManagerInterface $entityManager,
+        AuthChecker $authChecker
+    ): Response
     {
         // Authentication check
         if (!$authChecker->isLoggedIn()) {
             return $this->redirectToRoute('app_login');
+        }
+
+        // Only admins can delete teachers
+        if (!$authChecker->isAdmin()) {
+            $this->addFlash('error', 'Accès non autorisé. Cette section est réservée aux administrateurs.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $enseignant = $enseignantRepository->find($id);
+
+        if (!$enseignant) {
+            $this->addFlash('error', 'Enseignant non trouvé.');
+            return $this->redirectToRoute('app_administrateur_utilisateurs');
         }
 
         if ($this->isCsrfTokenValid('delete'.$enseignant->getId(), $request->request->get('_token'))) {
@@ -180,8 +371,10 @@ class EnseignantController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', 'Enseignant supprimé avec succès!');
+        } else {
+            $this->addFlash('error', 'Token CSRF invalide.');
         }
 
-        return $this->redirectToRoute('app_enseignant_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_administrateur_utilisateurs', [], Response::HTTP_SEE_OTHER);
     }
 }

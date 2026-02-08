@@ -23,20 +23,29 @@
                     <div class="d-flex align-items-center mb-4 p-3 border-bottom border-secondary">
                         <!-- Avatar -->
                         <div class="avatar me-3">
-                            <div class="avatar-img rounded-circle bg-primary bg-opacity-10">
-                                <span class="text-primary position-absolute top-50 start-50 translate-middle fw-bold">
-                                    {% if app.user and app.user.prenom is defined and app.user.nom is defined %}
-                                        {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
-                                    {% else %}
-                                        ??
-                                    {% endif %}
-                                </span>
-                            </div>
+                            {% if app.user and app.user.prenom is defined and app.user.nom is defined %}
+                                <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                    {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+                                </div>
+                            {% elseif user_name is defined and user_name %}
+                                <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                    {{ user_name|split(' ')|first|first|upper }}{{ user_name|split(' ')|last|first|upper }}
+                                </div>
+                            {% else %}
+                                <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                    ??
+                                </div>
+                            {% endif %}
                         </div>
                         <div>
-                            {% if app.user and app.user.prenom is defined and app.user.nom is defined and app.user.email is defined %}
-                                <a class="h6 mt-2 mt-sm-0 text-white" href="#">{{ app.user.prenom }} {{ app.user.nom }}</a>
+                            {% if app.user and app.user.prenom is defined and app.user.nom is defined %}
+                                <a class="h6 mt-2 mt-sm-0 text-white" href="{{ path('app_administrateur_profile') }}">{{ app.user.prenom }} {{ app.user.nom }}</a>
                                 <p class="small m-0 text-white-50">Administrateur</p>
+                                <p class="small m-0 text-white-50">{{ app.user.email }}</p>
+                            {% elseif user_name is defined and user_name and user_email is defined and user_email %}
+                                <a class="h6 mt-2 mt-sm-0 text-white" href="{{ path('app_administrateur_profile') }}">{{ user_name }}</a>
+                                <p class="small m-0 text-white-50">Administrateur</p>
+                                <p class="small m-0 text-white-50">{{ user_email }}</p>
                             {% else %}
                                 <a class="h6 mt-2 mt-sm-0 text-white" href="{{ path('app_login') }}">Non connecté</a>
                                 <p class="small m-0 text-white-50">Veuillez vous connecter</p>
@@ -115,20 +124,6 @@
                             </a>
                         </li>
 
-                        <!-- Documentation -->
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="far fa-clipboard fa-fw me-2"></i>Documentation
-                            </a>
-                        </li>
-
-                        <!-- Changelog -->
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-sitemap fa-fw me-2"></i>Changelog
-                            </a>
-                        </li>
-
                         <!-- Déconnexion -->
                         <li class="nav-item">
                             <a href="{{ path('app_logout') }}" class="nav-link text-danger">
@@ -202,8 +197,8 @@
                                 <!-- Top search START -->
                                 <div class="nav my-3 my-xl-0 flex-nowrap align-items-center">
                                     <div class="nav-item w-100">
-                                        <form class="position-relative">
-                                            <input class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search" placeholder="Search" aria-label="Search">
+                                        <form class="position-relative" action="{{ path('app_administrateur_utilisateurs') }}" method="get">
+                                            <input class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search" name="search" placeholder="Rechercher un utilisateur..." aria-label="Search">
                                             <button class="bg-transparent px-2 py-0 border-0 position-absolute top-50 end-0 translate-middle-y" type="submit"><i class="fas fa-search fs-6 text-primary"></i></button>
                                         </form>
                                     </div>
@@ -217,6 +212,19 @@
                         <!-- Top bar right START -->
                         <div class="ms-xl-auto">
                             <ul class="navbar-nav flex-row align-items-center">
+
+                                <!-- User name display -->
+                                <li class="nav-item d-none d-md-block me-3">
+                                    <span class="nav-link text-dark">
+                                        {% if app.user and app.user.prenom is defined and app.user.nom is defined %}
+                                            <i class="bi bi-person-circle me-1"></i>{{ app.user.prenom }} {{ app.user.nom }}
+                                            <span class="badge bg-purple ms-2">Admin</span>
+                                        {% elseif user_name is defined and user_name %}
+                                            <i class="bi bi-person-circle me-1"></i>{{ user_name }}
+                                            <span class="badge bg-purple ms-2">Admin</span>
+                                        {% endif %}
+                                    </span>
+                                </li>
 
                                 <!-- Notification dropdown START -->
                                 <li class="nav-item ms-2 ms-md-3 dropdown">
@@ -241,7 +249,15 @@
                                                         <a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
                                                             <div class="me-3">
                                                                 <div class="avatar avatar-md">
-                                                                    <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/08.jpg') }}" alt="avatar">
+                                                                    {% if app.user and app.user.prenom is defined and app.user.nom is defined %}
+                                                                        <div class="avatar-img rounded-circle bg-primary bg-opacity-10" style="width: 40px; height: 40px;">
+                                                                            <span class="text-primary position-absolute top-50 start-50 translate-middle fw-bold">
+                                                                                {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+                                                                            </span>
+                                                                        </div>
+                                                                    {% else %}
+                                                                        <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/08.jpg') }}" alt="avatar">
+                                                                    {% endif %}
                                                                 </div>
                                                             </div>
                                                             <div>
@@ -265,16 +281,29 @@
                                 <!-- Profile dropdown START -->
                                 <li class="nav-item ms-2 ms-md-3 dropdown">
                                     <!-- Avatar -->
-                                    <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <div class="avatar-img rounded-circle bg-primary bg-opacity-10">
-                                    <span class="text-primary position-absolute top-50 start-50 translate-middle fw-bold">
+                                    <a class="avatar avatar-sm p-0 d-flex align-items-center" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
                                         {% if app.user and app.user.prenom is defined and app.user.nom is defined %}
-                                            {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+                                            <div class="avatar-img rounded-circle bg-primary bg-opacity-10" style="width: 40px; height: 40px;">
+                                                <span class="text-primary position-absolute top-50 start-50 translate-middle fw-bold">
+                                                    {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+                                                </span>
+                                            </div>
+                                        {% elseif user_name is defined and user_name %}
+                                            <div class="avatar-img rounded-circle bg-primary bg-opacity-10" style="width: 40px; height: 40px;">
+                                                <span class="text-primary position-absolute top-50 start-50 translate-middle fw-bold">
+                                                    {{ user_name|split(' ')|first|first|upper }}{{ user_name|split(' ')|last|first|upper }}
+                                                </span>
+                                            </div>
                                         {% else %}
-                                            ??
+                                            <div class="avatar-img rounded-circle bg-primary bg-opacity-10" style="width: 40px; height: 40px;">
+                                                <span class="text-primary position-absolute top-50 start-50 translate-middle fw-bold">??</span>
+                                            </div>
                                         {% endif %}
-                                    </span>
-                                        </div>
+                                        {% if app.user and app.user.prenom is defined and app.user.nom is defined %}
+                                            <span class="d-none d-md-inline ms-2 text-dark">{{ app.user.prenom }} {{ app.user.nom }}</span>
+                                        {% elseif user_name is defined and user_name %}
+                                            <span class="d-none d-md-inline ms-2 text-dark">{{ user_name }}</span>
+                                        {% endif %}
                                     </a>
 
                                     <!-- Profile dropdown START -->
@@ -284,20 +313,33 @@
                                             <div class="d-flex align-items-center">
                                                 <!-- Avatar -->
                                                 <div class="avatar me-3 mb-3">
-                                                    <div class="avatar-img rounded-circle shadow bg-primary bg-opacity-10">
-                                                <span class="text-primary position-absolute top-50 start-50 translate-middle fw-bold">
                                                     {% if app.user and app.user.prenom is defined and app.user.nom is defined %}
-                                                        {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+                                                        <div class="avatar-img rounded-circle shadow bg-primary bg-opacity-10" style="width: 60px; height: 60px;">
+                                                            <span class="text-primary position-absolute top-50 start-50 translate-middle fw-bold">
+                                                                {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+                                                            </span>
+                                                        </div>
+                                                    {% elseif user_name is defined and user_name %}
+                                                        <div class="avatar-img rounded-circle shadow bg-primary bg-opacity-10" style="width: 60px; height: 60px;">
+                                                            <span class="text-primary position-absolute top-50 start-50 translate-middle fw-bold">
+                                                                {{ user_name|split(' ')|first|first|upper }}{{ user_name|split(' ')|last|first|upper }}
+                                                            </span>
+                                                        </div>
                                                     {% else %}
-                                                        ??
+                                                        <div class="avatar-img rounded-circle shadow bg-primary bg-opacity-10" style="width: 60px; height: 60px;">
+                                                            <span class="text-primary position-absolute top-50 start-50 translate-middle fw-bold">??</span>
+                                                        </div>
                                                     {% endif %}
-                                                </span>
-                                                    </div>
                                                 </div>
                                                 <div>
-                                                    {% if app.user and app.user.prenom is defined and app.user.nom is defined and app.user.email is defined %}
+                                                    {% if app.user and app.user.prenom is defined and app.user.nom is defined %}
                                                         <a class="h6 mt-2 mt-sm-0" href="{{ path('app_administrateur_profile') }}">{{ app.user.prenom }} {{ app.user.nom }}</a>
                                                         <p class="small m-0">{{ app.user.email }}</p>
+                                                        <p class="small m-0 text-success"><i class="bi bi-shield-check me-1"></i>Administrateur</p>
+                                                    {% elseif user_name is defined and user_name and user_email is defined and user_email %}
+                                                        <a class="h6 mt-2 mt-sm-0" href="{{ path('app_administrateur_profile') }}">{{ user_name }}</a>
+                                                        <p class="small m-0">{{ user_email }}</p>
+                                                        <p class="small m-0 text-success"><i class="bi bi-shield-check me-1"></i>Administrateur</p>
                                                     {% else %}
                                                         <a class="h6 mt-2 mt-sm-0" href="{{ path('app_login') }}">Non connecté</a>
                                                         <p class="small m-0">Veuillez vous connecter</p>
@@ -307,10 +349,12 @@
                                         </li>
                                         <li> <hr class="dropdown-divider"></li>
                                         <!-- Links -->
-                                        {% if app.user %}
+                                        {% if app.user or (user_name is defined and user_name) %}
                                             <li><a class="dropdown-item" href="{{ path('app_administrateur_dashboard') }}"><i class="bi bi-speedometer2 fa-fw me-2"></i>Dashboard</a></li>
-                                            <li><a class="dropdown-item" href="{{ path('app_administrateur_profile') }}"><i class="bi bi-person-circle fa-fw me-2"></i>Profile</a></li>
-                                            <li><a class="dropdown-item" href="{{ path('app_administrateur_utilisateurs') }}"><i class="fas fa-users fa-fw me-2"></i>Utilisateurs</a></li>
+                                            <li><a class="dropdown-item" href="{{ path('app_administrateur_profile') }}"><i class="bi bi-person-circle fa-fw me-2"></i>Mon Profil</a></li>
+                                            <li><a class="dropdown-item" href="{{ path('app_administrateur_utilisateurs') }}"><i class="fas fa-users fa-fw me-2"></i>Gérer les utilisateurs</a></li>
+                                            <li><a class="dropdown-item" href="{{ path('app_administrateur_statistiques') }}"><i class="bi bi-bar-chart fa-fw me-2"></i>Statistiques</a></li>
+                                            <li> <hr class="dropdown-divider"></li>
                                             <li><a class="dropdown-item" href="{{ path('app_home') }}"><i class="bi bi-house fa-fw me-2"></i>Site public</a></li>
                                             <li> <hr class="dropdown-divider"></li>
                                             <li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout') }}"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>

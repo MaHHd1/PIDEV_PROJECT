@@ -78,10 +78,10 @@
                                     <div class="d-flex align-items-center position-relative">
                                         <!-- Avatar -->
                                         <div class="avatar avatar-md">
-                                            <div class="avatar-img rounded-circle bg-{{ user.type == 'Étudiant' ? 'success' : (user.type == 'Enseignant' ? 'warning' : 'purple') }} bg-opacity-10">
-                                                    <span class="text-{{ user.type == 'Étudiant' ? 'success' : (user.type == 'Enseignant' ? 'warning' : 'purple') }} position-absolute top-50 start-50 translate-middle fw-bold">
-                                                        {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
-                                                    </span>
+                                            <div class="avatar-img rounded-circle bg-{{ user.type == 'etudiant' ? 'success' : (user.type == 'enseignant' ? 'warning' : 'purple') }} bg-opacity-10" style="width: 40px; height: 40px;">
+                                                <span class="text-{{ user.type == 'etudiant' ? 'success' : (user.type == 'enseignant' ? 'warning' : 'purple') }} position-absolute top-50 start-50 translate-middle fw-bold">
+                                                    {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+                                                </span>
                                             </div>
                                         </div>
                                         <div class="mb-0 ms-3">
@@ -96,9 +96,12 @@
 
                                 <!-- Table data -->
                                 <td>
-                                        <span class="badge bg-{{ user.type == 'Étudiant' ? 'success' : (user.type == 'Enseignant' ? 'warning' : 'purple') }}">
-                                            {{ user.type }}
-                                        </span>
+                                    <span class="badge bg-{{ user.type == 'etudiant' ? 'success' : (user.type == 'enseignant' ? 'warning' : 'purple') }}">
+                                        {% if user.type == 'etudiant' %}Étudiant
+                                        {% elseif user.type == 'enseignant' %}Enseignant
+                                        {% else %}Administrateur
+                                        {% endif %}
+                                    </span>
                                 </td>
 
                                 <!-- Table data -->
@@ -106,12 +109,12 @@
 
                                 <!-- Table data -->
                                 <td>
-                                    {% if user.type == 'Étudiant' %}
+                                    {% if user.type == 'etudiant' %}
                                         <div class="small">
                                             <div><strong>Niveau:</strong> {{ user.niveau|default('') }}</div>
                                             <div><strong>Spécialisation:</strong> {{ user.specialisation|default('') }}</div>
                                         </div>
-                                    {% elseif user.type == 'Enseignant' %}
+                                    {% elseif user.type == 'enseignant' %}
                                         <div class="small">
                                             <div><strong>Spécialité:</strong> {{ user.specialite|default('') }}</div>
                                             <div><strong>Expérience:</strong> {{ user.experience|default('') }} ans</div>
@@ -126,9 +129,9 @@
 
                                 <!-- Table data -->
                                 <td>
-                                        <span class="badge bg-{{ user.statut == 'actif' or user.statut == 'Actif' ? 'success' : 'secondary' }}">
-                                            {{ user.statut }}
-                                        </span>
+                                    <span class="badge bg-{{ user.statut == 'actif' or user.statut == 'Actif' ? 'success' : 'secondary' }}">
+                                        {{ user.statut }}
+                                    </span>
                                 </td>
 
                                 <!-- Table data -->
@@ -137,14 +140,17 @@
                                 <!-- Table data -->
                                 <td>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ path('app_administrateur_utilisateur_show', {'type': user.type|lower, 'id': user.id}) }}" class="btn btn-light btn-round me-1 mb-1 mb-md-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Voir">
+                                        <!-- Voir button -->
+                                        <a href="{{ path('app_administrateur_utilisateur_show', {'type': user.type, 'id': user.id}) }}" class="btn btn-light btn-round me-1 mb-1 mb-md-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Voir">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        {% if user.type == 'Étudiant' %}
+
+                                        <!-- Modifier button -->
+                                        {% if user.type == 'etudiant' %}
                                             <a href="{{ path('app_etudiant_edit', {'id': user.id}) }}" class="btn btn-success-soft btn-round me-1 mb-1 mb-md-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier">
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
-                                        {% elseif user.type == 'Enseignant' %}
+                                        {% elseif user.type == 'enseignant' %}
                                             <a href="{{ path('app_enseignant_edit', {'id': user.id}) }}" class="btn btn-warning-soft btn-round me-1 mb-1 mb-md-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier">
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
@@ -153,6 +159,11 @@
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
                                         {% endif %}
+
+                                        <!-- Delete button with modal trigger -->
+                                        <button type="button" class="btn btn-danger-soft btn-round me-1 mb-1 mb-md-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ user.id }}" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -221,12 +232,56 @@
         <!-- Card footer END -->
     </div>
 
+    <!-- Delete Modals for each user -->
+    {% if users is defined and users is not empty %}
+        {% for user in users %}
+            <!-- Delete Confirmation Modal for {{ user.id }} -->
+            <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ user.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel{{ user.id }}">Confirmer la suppression</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{{ user.prenom }} {{ user.nom }}</strong> ({{ user.email }}) ?</p>
+                            <p class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Cette action est irréversible.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <form method="post" action="
+                                {% if user.type == 'etudiant' %}
+                                    {{ path('app_etudiant_delete', {'id': user.id}) }}
+                                {% elseif user.type == 'enseignant' %}
+                                    {{ path('app_enseignant_delete', {'id': user.id}) }}
+                                {% else %}
+                                    {{ path('app_administrateur_delete', {'id': user.id}) }}
+                                {% endif %}
+                            ">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <script>
         // Auto-submit form when filter selects change
         document.querySelectorAll('select[name="type"], select[name="statut"]').forEach(select => {
             select.addEventListener('change', function() {
                 this.form.submit();
             });
+        });
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
         });
     </script>
 {% endblock %}

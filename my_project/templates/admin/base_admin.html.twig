@@ -41,7 +41,7 @@
             {% if app.user %}
                 <div class="sidebar-user">
                     <div class="sidebar-user-avatar">
-                        <span class="avatar-text">{{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}</span>
+                        <div class="avatar-text">{{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}</div>
                     </div>
                     <div class="sidebar-user-info">
                         <h6 class="sidebar-user-name">{{ app.user.prenom }} {{ app.user.nom }}</h6>

@@ -17,34 +17,52 @@
 
     <div class="card shadow">
         <div class="card-body p-4">
-            {{ form_start(form) }}
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
             <div class="row g-3">
                 <div class="col-md-6">
-                    {{ form_row(form.nom) }}
+                    {{ form_label(form.nom, 'Nom') }}
+                    {{ form_widget(form.nom) }}
+                    {{ form_errors(form.nom) }}
                 </div>
                 <div class="col-md-6">
-                    {{ form_row(form.prenom) }}
+                    {{ form_label(form.prenom, 'Prénom') }}
+                    {{ form_widget(form.prenom) }}
+                    {{ form_errors(form.prenom) }}
                 </div>
                 <div class="col-md-6">
-                    {{ form_row(form.email) }}
+                    {{ form_label(form.email, 'Email') }}
+                    {{ form_widget(form.email) }}
+                    {{ form_errors(form.email) }}
                 </div>
                 <div class="col-md-6">
-                    {{ form_row(form.telephone) }}
+                    {{ form_label(form.telephone, 'Téléphone') }}
+                    {{ form_widget(form.telephone) }}
+                    {{ form_errors(form.telephone) }}
                 </div>
                 <div class="col-md-6">
-                    {{ form_row(form.departement) }}
+                    {{ form_label(form.departement, 'Département') }}
+                    {{ form_widget(form.departement) }}
+                    {{ form_errors(form.departement) }}
                 </div>
                 <div class="col-md-6">
-                    {{ form_row(form.fonction) }}
+                    {{ form_label(form.fonction, 'Fonction') }}
+                    {{ form_widget(form.fonction) }}
+                    {{ form_errors(form.fonction) }}
                 </div>
                 <div class="col-md-6">
-                    {{ form_row(form.dateNomination) }}
+                    {{ form_label(form.dateNomination, 'Date de nomination') }}
+                    {{ form_widget(form.dateNomination) }}
+                    {{ form_errors(form.dateNomination) }}
                 </div>
                 <div class="col-md-6">
-                    {{ form_row(form.motDePasse) }}
+                    {{ form_label(form.motDePasse, 'Mot de passe') }}
+                    {{ form_widget(form.motDePasse) }}
+                    {{ form_errors(form.motDePasse) }}
                 </div>
                 <div class="col-md-6">
-                    {{ form_row(form.actif) }}
+                    {{ form_label(form.actif, 'Statut') }}
+                    {{ form_widget(form.actif) }}
+                    {{ form_errors(form.actif) }}
                 </div>
             </div>
 

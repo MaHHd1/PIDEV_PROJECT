@@ -62,7 +62,7 @@ class UtilisateurController extends AbstractController
         foreach ($etudiants as $etudiant) {
             $allUsers[] = [
                 'id' => $etudiant->getId(),
-                'type' => 'Étudiant',
+                'type' => 'etudiant',  // Changed to lowercase
                 'nom' => $etudiant->getNom(),
                 'prenom' => $etudiant->getPrenom(),
                 'email' => $etudiant->getEmail(),
@@ -79,7 +79,7 @@ class UtilisateurController extends AbstractController
         foreach ($enseignants as $enseignant) {
             $allUsers[] = [
                 'id' => $enseignant->getId(),
-                'type' => 'Enseignant',
+                'type' => 'enseignant',  // Changed to lowercase
                 'nom' => $enseignant->getNom(),
                 'prenom' => $enseignant->getPrenom(),
                 'email' => $enseignant->getEmail(),
@@ -97,7 +97,7 @@ class UtilisateurController extends AbstractController
         foreach ($administrateurs as $administrateur) {
             $allUsers[] = [
                 'id' => $administrateur->getId(),
-                'type' => 'Administrateur',
+                'type' => 'administrateur',  // Changed to lowercase
                 'nom' => $administrateur->getNom(),
                 'prenom' => $administrateur->getPrenom(),
                 'email' => $administrateur->getEmail(),
@@ -113,7 +113,10 @@ class UtilisateurController extends AbstractController
         // Apply simple filtering - remove complex filtering for now
         if (!empty($criteria['type']) && $criteria['type'] !== 'all') {
             $allUsers = array_filter($allUsers, function($user) use ($criteria) {
-                return $user['type'] === $criteria['type'];
+                // Normalize type for comparison
+                $userTypeDisplay = $user['type'] == 'etudiant' ? 'Étudiant' :
+                    ($user['type'] == 'enseignant' ? 'Enseignant' : 'Administrateur');
+                return $userTypeDisplay === $criteria['type'];
             });
         }
 
@@ -202,9 +205,12 @@ class UtilisateurController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
+        // Normalize the type parameter to handle accents and case variations
+        $normalizedType = $this->normalizeType($type);
+
         $user = null;
 
-        switch ($type) {
+        switch ($normalizedType) {
             case 'etudiant':
                 $user = $etudiantRepository->find($id);
                 break;
@@ -214,6 +220,9 @@ class UtilisateurController extends AbstractController
             case 'administrateur':
                 $user = $administrateurRepository->find($id);
                 break;
+            default:
+                $this->addFlash('error', 'Type d\'utilisateur non valide.');
+                return $this->redirectToRoute('app_administrateur_utilisateurs');
         }
 
         if (!$user) {
@@ -223,7 +232,26 @@ class UtilisateurController extends AbstractController
 
         return $this->render('admin/utilisateur_show.html.twig', [
             'user' => $user,
-            'type' => $type,
+            'type' => $normalizedType,
         ]);
+    }
+
+    /**
+     * Normalize user type to handle accents and case variations
+     */
+    private function normalizeType(string $type): string
+    {
+        // Convert to lowercase
+        $type = strtolower($type);
+
+        // Remove French accents
+        $search = ['é', 'è', 'ê', 'ë', 'É', 'È', 'Ê', 'Ë'];
+        $replace = ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'];
+        $type = str_replace($search, $replace, $type);
+
+        // Remove any remaining special characters
+        $type = preg_replace('/[^a-z]/', '', $type);
+
+        return $type;
     }
 }

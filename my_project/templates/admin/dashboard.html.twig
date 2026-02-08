@@ -84,14 +84,14 @@
                 <div class="card shadow h-100">
                     <div class="card-header border-bottom d-flex justify-content-between align-items-center p-4">
                         <h5 class="card-header-title">Étudiants récents</h5>
-                        <a href="{{ path('app_etudiant_index') }}" class="btn btn-link p-0 mb-0">Voir tous</a>
+                        <a href="{{ path('app_administrateur_utilisateurs') }}" class="btn btn-link p-0 mb-0">Voir tous</a>
                     </div>
                     <div class="card-body p-4">
                         {% if recentEtudiants|length > 0 %}
                             {% for etudiant in recentEtudiants %}
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="avatar avatar-sm flex-shrink-0">
-                                        <div class="avatar-img rounded-circle bg-success bg-opacity-10">
+                                        <div class="avatar-img rounded-circle bg-success bg-opacity-10" style="width: 40px; height: 40px;">
                                             <span class="text-success fw-bold">{{ etudiant.prenom|first|upper }}{{ etudiant.nom|first|upper }}</span>
                                         </div>
                                     </div>
@@ -113,14 +113,14 @@
                 <div class="card shadow h-100">
                     <div class="card-header border-bottom d-flex justify-content-between align-items-center p-4">
                         <h5 class="card-header-title">Enseignants récents</h5>
-                        <a href="{{ path('app_enseignant_index') }}" class="btn btn-link p-0 mb-0">Voir tous</a>
+                        <a href="{{ path('app_administrateur_utilisateurs') }}" class="btn btn-link p-0 mb-0">Voir tous</a>
                     </div>
                     <div class="card-body p-4">
                         {% if recentEnseignants|length > 0 %}
                             {% for enseignant in recentEnseignants %}
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="avatar avatar-sm flex-shrink-0">
-                                        <div class="avatar-img rounded-circle bg-warning bg-opacity-10">
+                                        <div class="avatar-img rounded-circle bg-warning bg-opacity-10" style="width: 40px; height: 40px;">
                                             <span class="text-warning fw-bold">{{ enseignant.prenom|first|upper }}{{ enseignant.nom|first|upper }}</span>
                                         </div>
                                     </div>
@@ -142,14 +142,14 @@
                 <div class="card shadow h-100">
                     <div class="card-header border-bottom d-flex justify-content-between align-items-center p-4">
                         <h5 class="card-header-title">Administrateurs récents</h5>
-                        <a href="{{ path('app_administrateur_index') }}" class="btn btn-link p-0 mb-0">Voir tous</a>
+                        <a href="{{ path('app_administrateur_utilisateurs') }}" class="btn btn-link p-0 mb-0">Voir tous</a>
                     </div>
                     <div class="card-body p-4">
                         {% if recentAdmins|length > 0 %}
                             {% for admin in recentAdmins %}
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="avatar avatar-sm flex-shrink-0">
-                                        <div class="avatar-img rounded-circle bg-purple bg-opacity-10">
+                                        <div class="avatar-img rounded-circle bg-purple bg-opacity-10" style="width: 40px; height: 40px;">
                                             <span class="text-purple fw-bold">{{ admin.prenom|first|upper }}{{ admin.nom|first|upper }}</span>
                                         </div>
                                     </div>

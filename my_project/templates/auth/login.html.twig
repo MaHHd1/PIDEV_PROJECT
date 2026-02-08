@@ -54,41 +54,65 @@
                             <h1 class="fs-2">Login into Eduport!</h1>
                             <p class="lead mb-4">Nice to see you! Please log in with your account.</p>
 
+                            <!-- Display messages -->
+                            {% if error %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ error|trans({}, 'security') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endif %}
+
+                            {% for flash_error in app.flashes('error') %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ flash_error }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+
+                            {% for flash_success in app.flashes('success') %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ flash_success }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+
+                            {% for flash_info in app.flashes('info') %}
+                                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                    {{ flash_info }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+
                             <!-- Form START -->
                             <!-- Added novalidate to disable HTML5 validation -->
                             <form method="post" action="{{ path('app_login') }}" novalidate>
-                                {% if error %}
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        {{ error }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                {% endif %}
+                                {{ form_start(form) }}
 
                                 <!-- Email -->
                                 <div class="mb-4">
-                                    <label for="email" class="form-label">Email address *</label>
+                                    <label for="{{ form.email.vars.id }}" class="form-label">Email address *</label>
                                     <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light rounded-start border-0 text-secondary px-3">
                                             <i class="bi bi-envelope-fill"></i>
                                         </span>
-                                        <!-- Removed required attribute and added value -->
-                                        <input type="email" value="{{ email }}" name="email" id="email" class="form-control border-0 bg-light rounded-end ps-1" placeholder="E-mail" autocomplete="email" autofocus>
+                                        {{ form_widget(form.email, {'attr': {'class': 'form-control border-0 bg-light rounded-end ps-1', 'placeholder': 'E-mail', 'autocomplete': 'email', 'autofocus': ''}}) }}
                                     </div>
+                                    {{ form_errors(form.email) }}
                                 </div>
 
                                 <!-- Password -->
                                 <div class="mb-4">
-                                    <label for="password" class="form-label">Password *</label>
+                                    <label for="{{ form.password.vars.id }}" class="form-label">Password *</label>
                                     <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light rounded-start border-0 text-secondary px-3">
                                             <i class="fas fa-lock"></i>
                                         </span>
-                                        <!-- Removed required attribute -->
-                                        <input type="password" name="password" id="password" class="form-control border-0 bg-light rounded-end ps-1" placeholder="password" autocomplete="current-password">
+                                        {{ form_widget(form.password, {'attr': {'class': 'form-control border-0 bg-light rounded-end ps-1', 'placeholder': 'password', 'autocomplete': 'current-password'}}) }}
                                     </div>
                                     <div id="passwordHelpBlock" class="form-text">
                                         Your password must be 8 characters at least
                                     </div>
+                                    {{ form_errors(form.password) }}
                                 </div>
 
                                 <!-- Check box -->
@@ -107,9 +131,11 @@
                                 <!-- Button -->
                                 <div class="align-items-center mt-0">
                                     <div class="d-grid">
-                                        <button class="btn btn-primary mb-0" type="submit">Login</button>
+                                        {{ form_widget(form.submit, {'attr': {'class': 'btn btn-primary mb-0'}}) }}
                                     </div>
                                 </div>
+
+                                {{ form_end(form) }}
                             </form>
                             <!-- Form END -->
 
