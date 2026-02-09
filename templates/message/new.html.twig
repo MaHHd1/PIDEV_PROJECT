@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau message{% endblock %}
+
+{% block body %}
+<h2>➕ Nouveau message — Utilisateur actif: {{ activeUser.username }} (ID={{ activeUser.id }})</h2>
+
+<a href="{{ path('message_inbox', {u: activeUser.id}) }}">📥 Inbox</a> |
+<a href="{{ path('message_sent', {u: activeUser.id}) }}">📤 Envoyés</a>
+
+<hr>
+
+{{ form_start(form) }}
+  {{ form_row(form.destinataire) }}
+  {{ form_row(form.objet) }}
+  {{ form_row(form.contenu) }}
+  {{ form_row(form.priorite) }}
+  {{ form_row(form.categorie) }}
+  {{ form_row(form.pieceJointe) }}
+  <button type="submit">Envoyer</button>
+{{ form_end(form) }}
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+{% block title %}Message{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">✉️ Conversation</h3>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-dark" href="{{ path('message_inbox', {u: activeUser.id}) }}">Inbox</a>
+    <a class="btn btn-outline-dark" href="{{ path('message_sent', {u: activeUser.id}) }}">Envoyés</a>
+    <a class="btn btn-outline-dark" href="{{ path('message_archive', {u: activeUser.id}) }}">Archives</a>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <div class="text-muted mb-1">
+      De <b>{{ root.expediteur.username }}</b> à <b>{{ root.destinataire.username }}</b>
+      • {{ root.dateEnvoi ? root.dateEnvoi|date('Y-m-d H:i') : '' }}
+      • <span class="badge text-bg-secondary">{{ root.statut }}</span>
+    </div>
+    <h5 class="mb-2">{{ root.objet }}</h5>
+    <div>{{ root.contenu|nl2br }}</div>
+  </div>
+</div>
+
+{% if thread|length > 1 %}
+  <h5 class="mb-2">Réponses</h5>
+  {% for m in thread %}
+    {% if m.id != root.id %}
+      <div class="card mb-2">
+        <div class="card-body">
+          <div class="text-muted mb-1">
+            <b>{{ m.expediteur.username }}</b> → <b>{{ m.destinataire.username }}</b>
+            • {{ m.dateEnvoi ? m.dateEnvoi|date('Y-m-d H:i') : '' }}
+          </div>
+          <div>{{ m.contenu|nl2br }}</div>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+<div class="d-flex gap-2 mt-3">
+  <a class="btn btn-primary" href="{{ path('message_reply', {id: message.id, u: activeUser.id}) }}">↩ Répondre</a>
+
+  <form method="post" action="{{ path('message_toggle_archive', {id: message.id, u: activeUser.id, from: 'inbox'}) }}">
+    <button class="btn btn-outline-secondary">Archiver / Désarchiver</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouveau post{% endblock %}
+
+{% block body %}
+<h3 class="mb-3">➕ Nouveau post/commentaire</h3>
+
+<div class="text-muted mb-2">Forum: {{ forum.titre }} • User actif: {{ activeUser.username }} (u={{ activeUser.id }})</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    {{ form_start(form) }}
+      {{ form_row(form.contenu) }}
+      <button class="btn btn-primary">Publier</button>
+    {{ form_end(form) }}
+  </div>
+</div>
+
+<a class="btn btn-link mt-3" href="{{ path('forum_show', {id: forum.id, u: activeUser.id}) }}">← Retour</a>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ forum.titre }}{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center">
+  <div>
+    <h3 class="mb-1">
+    💬 {{ forum.titre }}
+    {% if forum.estModifie %}
+        <span class="badge text-bg-warning ms-2">modifié</span>
+    {% endif %}
+    </h3>
+    {% if forum.estModifie and forum.dateModification %}
+    <div class="text-muted">Dernière modification : {{ forum.dateModification|date('Y-m-d H:i') }}</div>
+    {% endif %}
+    <div class="text-muted">
+      Créé par {{ forum.createur.username }}
+      • Vues {{ forum.nombreVues }}
+      • Type {{ forum.type }}
+      • Statut {{ forum.statut }}
+      • 👍 {{ forum.likes ?? 0 }} • 👎 {{ forum.dislikes ?? 0 }} • 🚩 {{ forum.signalements ?? 0 }}
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{{ path('forum_edit', {id: forum.id, u: activeUser.id}) }}">✏️ Modifier</a>
+    <a class="btn btn-outline-dark" href="{{ path('forum_list', {u: activeUser.id}) }}">← Liste</a>
+  </div>
+</div>
+
+<hr>
+
+{% if forum.imageCouvertureUrl %}
+  {% set img = forum.imageCouvertureUrl|trim %}
+  {% if img starts with 'www.' %}
+    {% set img = 'https://' ~ img %}
+  {% endif %}
+
+  <div class="mb-3">
+    <a href="{{ img }}" target="_blank" rel="noopener noreferrer">
+      <img class="img-fluid rounded border" style="max-height:260px; object-fit:cover;" src="{{ img }}" alt="cover">
+    </a>
+  </div>
+{% endif %}
+
+<p>{{ forum.description|nl2br }}</p>
+
+{% if forum.reglesModeration %}
+  <div class="alert alert-warning">
+    <b>Règles de modération:</b><br>
+    {{ forum.reglesModeration|nl2br }}
+  </div>
+{% endif %}
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <a class="btn btn-primary" href="{{ path('comment_new', {forumId: forum.id, u: activeUser.id}) }}">+ Ajouter un commentaire</a>
+
+  <form method="post" action="{{ path('forum_like', {id: forum.id, u: activeUser.id}) }}">
+    <button class="btn btn-outline-success">👍 Like forum</button>
+  </form>
+
+  <form method="post" action="{{ path('forum_dislike', {id: forum.id, u: activeUser.id}) }}">
+    <button class="btn btn-outline-danger">👎 Dislike forum</button>
+  </form>
+
+  <form method="post" action="{{ path('forum_report', {id: forum.id, u: activeUser.id}) }}">
+    <button class="btn btn-outline-warning">🚩 Report forum</button>
+  </form>
+
+  <form method="post" action="{{ path('forum_delete', {id: forum.id, u: activeUser.id}) }}"
+        onsubmit="return confirm('Supprimer ce forum ?');">
+    <button class="btn btn-outline-secondary">🗑 Delete forum</button>
+  </form>
+</div>
+
+<h4 class="mt-4">🗨️ Posts & commentaires ({{ comments|length }})</h4>
+
+{% if comments is empty %}
+  <div class="alert alert-info">Aucun commentaire.</div>
+{% else %}
+  {% for c in comments %}
+    {% set indent = c.parent ? 40 : 0 %}
+    <div class="card shadow-sm mb-2" style="margin-left: {{ indent }}px;">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <b>{{ c.utilisateur.username }}</b>
+            <span class="text-muted">• {{ c.datePublication|date('Y-m-d H:i') }}</span>
+            {% if c.statut == 'en_attente' %}
+              <span class="badge text-bg-warning ms-2">en attente</span>
+            {% endif %}
+          </div>
+          <div class="text-muted">
+            👍 {{ c.likes }} • 👎 {{ c.dislikes }} • 🚩 {{ c.signalements }} • réponses {{ c.nbReponses }}
+          </div>
+        </div>
+
+        <div class="mt-2">{{ c.contenu|nl2br }}</div>
+
+        <div class="d-flex gap-2 mt-3">
+          <a class="btn btn-sm btn-outline-primary" href="{{ path('comment_reply', {commentId: c.id, u: activeUser.id}) }}">↩ Reply</a>
+
+          <form method="post" action="{{ path('comment_like', {id: c.id, u: activeUser.id}) }}">
+            <button class="btn btn-sm btn-outline-success">👍 Like</button>
+          </form>
+
+          <form method="post" action="{{ path('comment_dislike', {id: c.id, u: activeUser.id}) }}">
+            <button class="btn btn-sm btn-outline-danger">👎 Dislike</button>
+          </form>
+
+          <form method="post" action="{{ path('comment_report', {id: c.id, u: activeUser.id}) }}">
+            <button class="btn btn-sm btn-outline-warning">🚩 Report</button>
+          </form>
+
+          <form method="post" action="{{ path('comment_delete', {id: c.id, u: activeUser.id}) }}">
+            <button class="btn btn-sm btn-outline-secondary">🗑 Delete</button>
+          </form>
+        </div>
+
+        {% if c.parent %}
+          <div class="text-muted mt-2">↪ réponse à commentaire #{{ c.parent.id }}</div>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
+{% endblock %}

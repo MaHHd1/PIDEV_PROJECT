@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouveau forum{% endblock %}
+
+{% block body %}
+<h3 class="mb-3">➕ Nouveau forum</h3>
+
+<a class="btn btn-link" href="{{ path('forum_list', {u: activeUser.id}) }}">← Retour</a>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    {{ form_start(form) }}
+      {{ form_row(form.titre) }}
+      {{ form_row(form.description) }}
+      {{ form_row(form.type) }}
+      {{ form_row(form.statut) }}
+      {{ form_row(form.imageCouvertureUrl) }}
+      {{ form_row(form.reglesModeration) }}
+      <button class="btn btn-primary">Créer</button>
+    {{ form_end(form) }}
+  </div>
+</div>
+{% endblock %}

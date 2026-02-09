@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+{% block title %}Répondre{% endblock %}
+
+{% block body %}
+<h3 class="mb-3">↩ Répondre</h3>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="text-muted mb-1">
+      {{ parent.expediteur.username }} → {{ parent.destinataire.username }}
+      • {{ parent.dateEnvoi ? parent.dateEnvoi|date('Y-m-d H:i') : '' }}
+    </div>
+    <b>{{ parent.objet }}</b>
+    <div class="mt-2">{{ parent.contenu|nl2br }}</div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    {{ form_start(form) }}
+      {{ form_row(form.destinataire) }}
+      {{ form_row(form.objet) }}
+      {{ form_row(form.contenu) }}
+      <button class="btn btn-success">Envoyer</button>
+    {{ form_end(form) }}
+  </div>
+</div>
+
+<a class="btn btn-link mt-3" href="{{ path('message_show', {id: parent.id, u: activeUser.id}) }}">← Retour</a>
+{% endblock %}
