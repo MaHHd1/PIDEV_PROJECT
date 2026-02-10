@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ParticipationEvenement{% endblock %}
+
+{% block body %}
+    <h1>ParticipationEvenement</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ participation_evenement.id }}</td>
+            </tr>
+            <tr>
+                <th>Statut</th>
+                <td>{{ participation_evenement.statut }}</td>
+            </tr>
+            <tr>
+                <th>DateInscription</th>
+                <td>{{ participation_evenement.dateInscription ? participation_evenement.dateInscription|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>HeureArrivee</th>
+                <td>{{ participation_evenement.heureArrivee ? participation_evenement.heureArrivee|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>HeureDepart</th>
+                <td>{{ participation_evenement.heureDepart ? participation_evenement.heureDepart|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>FeedbackNote</th>
+                <td>{{ participation_evenement.feedbackNote }}</td>
+            </tr>
+            <tr>
+                <th>FeedbackCommentaire</th>
+                <td>{{ participation_evenement.feedbackCommentaire }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_participation_evenement_index') }}">back to list</a>
+
+    <a href="{{ path('app_participation_evenement_edit', {'id': participation_evenement.id}) }}">edit</a>
+
+    {{ include('participation_evenement/_delete_form.html.twig') }}
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends 'admin/admin_base.html.twig' %}
+
+{% block title %}Tableau de bord - Gestion Événements{% endblock %}
+
+{% block admin_content %}
+    <!-- Titre + bouton rapide -->
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h1 class="h3 mb-0">Tableau de bord</h1>
+            <p class="text-muted mb-0">Bienvenue, {{ app.user.prenom|default('Administrateur') }} !</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ path('app_evenement_new') }}" class="btn btn-success">
+                <i class="bi bi-plus-lg me-1"></i> Créer un événement
+            </a>
+        </div>
+    </div>
+
+    <div class="card bg-transparent shadow-sm">
+        <!-- Compteurs -->
+        <div class="row g-4 mb-5">
+            <!-- Total utilisateurs -->
+            <div class="col-md-6 col-xxl-3">
+                <div class="card card-body bg-primary bg-opacity-10 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="purecounter mb-0 fw-bold text-primary" 
+                                 data-purecounter-start="0" 
+                                 data-purecounter-end="{{ stats.total_users|default(0) }}" 
+                                 data-purecounter-duration="1.5">0</h2>
+                            <span class="h6 fw-light text-primary">Total Utilisateurs</span>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-primary text-white">
+                            <i class="fas fa-users fa-fw"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Étudiants -->
+            <div class="col-md-6 col-xxl-3">
+                <div class="card card-body bg-success bg-opacity-10 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="purecounter mb-0 fw-bold text-success" 
+                                 data-purecounter-start="0" 
+                                 data-purecounter-end="{{ stats.etudiants|default(0) }}" 
+                                 data-purecounter-duration="1.5">0</h2>
+                            <span class="h6 fw-light text-success">Étudiants</span>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-success text-white">
+                            <i class="fas fa-user-graduate fa-fw"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enseignants -->
+            <div class="col-md-6 col-xxl-3">
+                <div class="card card-body bg-warning bg-opacity-10 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="purecounter mb-0 fw-bold text-warning" 
+                                 data-purecounter-start="0" 
+                                 data-purecounter-end="{{ stats.enseignants|default(0) }}" 
+                                 data-purecounter-duration="1.5">0</h2>
+                            <span class="h6 fw-light text-warning">Enseignants</span>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-warning text-white">
+                            <i class="fas fa-user-tie fa-fw"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Administrateurs -->
+            <div class="col-md-6 col-xxl-3">
+                <div class="card card-body bg-purple bg-opacity-10 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="purecounter mb-0 fw-bold text-purple" 
+                                 data-purecounter-start="0" 
+                                 data-purecounter-end="{{ stats.administrateurs|default(0) }}" 
+                                 data-purecounter-duration="1.5">0</h2>
+                            <span class="h6 fw-light text-purple">Administrateurs</span>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-purple text-white">
+                            <i class="fas fa-users-cog fa-fw"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total événements -->
+            <div class="col-md-6 col-xxl-3">
+                <div class="card card-body bg-info bg-opacity-10 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="purecounter mb-0 fw-bold text-info" 
+                                 data-purecounter-start="0" 
+                                 data-purecounter-end="{{ stats.total_evenements|default(0) }}" 
+                                 data-purecounter-duration="1.5">0</h2>
+                            <span class="h6 fw-light text-info">Total Événements</span>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-info text-white">
+                            <i class="fas fa-calendar-alt fa-fw"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Événements à venir -->
+            <div class="col-md-6 col-xxl-3">
+                <div class="card card-body bg-warning bg-opacity-10 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="purecounter mb-0 fw-bold text-warning" 
+                                 data-purecounter-start="0" 
+                                 data-purecounter-end="{{ stats.evenements_a_venir|default(0) }}" 
+                                 data-purecounter-duration="1.5">0</h2>
+                            <span class="h6 fw-light text-warning">Événements à venir</span>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-warning text-white">
+                            <i class="fas fa-clock fa-fw"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total participations -->
+            <div class="col-md-6 col-xxl-3">
+                <div class="card card-body bg-success bg-opacity-10 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="purecounter mb-0 fw-bold text-success" 
+                                 data-purecounter-start="0" 
+                                 data-purecounter-end="{{ stats.total_participations|default(0) }}" 
+                                 data-purecounter-duration="1.5">0</h2>
+                            <span class="h6 fw-light text-success">Total Participations</span>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-success text-white">
+                            <i class="fas fa-ticket-alt fa-fw"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sections récentes -->
+        <div class="row g-4">
+            <!-- Événements récents -->
+            <div class="col-lg-6">
+                <div class="card shadow h-100">
+                    <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3">
+                        <h5 class="card-header-title mb-0">Événements récents</h5>
+                        <a href="{{ path('app_evenement_index') }}" class="btn btn-sm btn-link p-0">Voir tous</a>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if recentEvenements|length > 0 %}
+                            {% for evenement in recentEvenements %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar avatar-sm flex-shrink-0">
+                                        <div class="avatar-img rounded-circle bg-info bg-opacity-10 text-info fw-bold d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                                            {{ evenement.titre|first|upper }}
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">{{ evenement.titre }}</h6>
+                                        <small class="text-muted">
+                                            {{ evenement.dateDebut ? evenement.dateDebut|date('d/m/Y H:i') : 'Non défini' }}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center py-4">Aucun événement récent</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Participations récentes -->
+            <div class="col-lg-6">
+                <div class="card shadow h-100">
+                    <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3">
+                        <h5 class="card-header-title mb-0">Participations récentes</h5>
+                        <a href="{{ path('app_participation_evenement_index') }}" class="btn btn-link p-0 mb-0">Voir tous</a>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if recentParticipations|length > 0 %}
+                            {% for participation in recentParticipations %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar avatar-sm flex-shrink-0">
+                                        <div class="avatar-img rounded-circle bg-success bg-opacity-10 text-success fw-bold d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                                            {{ participation.utilisateur.prenom|first|upper }}{{ participation.utilisateur.nom|first|upper }}
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">{{ participation.utilisateur.prenom }} {{ participation.utilisateur.nom }}</h6>
+                                        <small class="text-muted d-block text-truncate" style="max-width: 280px;">
+                                            → {{ participation.evenement.titre|length > 40 ? participation.evenement.titre|slice(0, 37) ~ '...' : participation.evenement.titre }}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center py-4">Aucune participation récente</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

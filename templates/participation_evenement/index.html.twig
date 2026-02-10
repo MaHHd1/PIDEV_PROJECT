@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Participations aux événements{% endblock %}
+
+{% block body %}
+    <h1>Liste des participations</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Événement</th>
+                <th>Utilisateur</th>
+                <th>Statut</th>
+                <th>Date inscription</th>
+                <th>Heure arrivée</th>
+                <th>Heure départ</th>
+                <th>Note feedback</th>
+                <th>Commentaire</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for participation in participation_evenements %}
+            <tr>
+                <td>{{ participation.id }}</td>
+                <td>
+                    {% if participation.evenement %}
+                        <a href="{{ path('app_evenement_show', {'id': participation.evenement.id}) }}">
+                            {{ participation.evenement.titre }}
+                        </a>
+                    {% else %}
+                        Non spécifié
+                    {% endif %}
+                </td>
+                <td>{{ participation.utilisateur ? participation.utilisateur.email : 'Anonyme' }}</td>
+
+                {# Statut avec badge #}
+                <td>
+                    <span class="badge rounded-pill
+                        {% if participation.statut.value == 'inscrit' %}bg-primary
+                        {% elseif participation.statut.value == 'present' %}bg-success
+                        {% elseif participation.statut.value == 'absent' %}bg-danger
+                        {% elseif participation.statut.value == 'excuse' %}bg-warning text-dark{% endif %}">
+                        {{ participation.statut.value|capitalize }}
+                    </span>
+                </td>
+
+                <td>{{ participation.dateInscription ? participation.dateInscription|date('d/m/Y H:i') : '-' }}</td>
+                <td>{{ participation.heureArrivee ? participation.heureArrivee|date('H:i') : '-' }}</td>
+                <td>{{ participation.heureDepart ? participation.heureDepart|date('H:i') : '-' }}</td>
+                <td>{{ participation.feedbackNote ?: '-' }}</td>
+                <td>{{ participation.feedbackCommentaire ?: '-' }}</td>
+
+                <td>
+                    <a href="{{ path('app_participation_evenement_show', {'id': participation.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                    <a href="{{ path('app_participation_evenement_edit', {'id': participation.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+
+                    {{ include('participation_evenement/_delete_form.html.twig', {'participationEvenement': participation}) }}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="10" class="text-center">Aucune participation trouvée.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_participation_evenement_new') }}" class="btn btn-success">Nouvelle participation</a>
+{% endblock %}
