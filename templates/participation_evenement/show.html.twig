@@ -1,46 +1,281 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}ParticipationEvenement{% endblock %}
+{% block title %}Participation {{ participation_evenement.id }}{% endblock %}
 
 {% block body %}
-    <h1>ParticipationEvenement</h1>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1>Participation #{{ participation_evenement.id }}</h1>
+                    <div class="btn-group">
+                        <a href="{{ path('app_participation_evenement_index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Retour à la liste
+                        </a>
+                        <a href="{{ path('app_participation_evenement_edit', {'id': participation_evenement.id}) }}" class="btn btn-primary">
+                            <i class="bi bi-pencil me-1"></i> Modifier
+                        </a>
+                        {{ include('participation_evenement/_delete_form.html.twig') }}
+                    </div>
+                </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ participation_evenement.id }}</td>
-            </tr>
-            <tr>
-                <th>Statut</th>
-                <td>{{ participation_evenement.statut }}</td>
-            </tr>
-            <tr>
-                <th>DateInscription</th>
-                <td>{{ participation_evenement.dateInscription ? participation_evenement.dateInscription|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>HeureArrivee</th>
-                <td>{{ participation_evenement.heureArrivee ? participation_evenement.heureArrivee|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>HeureDepart</th>
-                <td>{{ participation_evenement.heureDepart ? participation_evenement.heureDepart|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>FeedbackNote</th>
-                <td>{{ participation_evenement.feedbackNote }}</td>
-            </tr>
-            <tr>
-                <th>FeedbackCommentaire</th>
-                <td>{{ participation_evenement.feedbackCommentaire }}</td>
-            </tr>
-        </tbody>
-    </table>
+                <div class="card shadow">
+                    <div class="card-body">
+                        <!-- Informations principales -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5 class="card-title">Informations de la participation</h5>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th width="40%">ID :</th>
+                                        <td>{{ participation_evenement.id }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Statut :</th>
+                                        <td>
+                                            <span class="badge rounded-pill
+                                                {% if participation_evenement.statut.value == 'inscrit' %}bg-primary
+                                                {% elseif participation_evenement.statut.value == 'present' %}bg-success
+                                                {% elseif participation_evenement.statut.value == 'absent' %}bg-danger
+                                                {% elseif participation_evenement.statut.value == 'excuse' %}bg-warning text-dark{% endif %}">
+                                                {{ participation_evenement.statut.value|capitalize }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Date d'inscription :</th>
+                                        <td>{{ participation_evenement.dateInscription ? participation_evenement.dateInscription|date('d/m/Y H:i') : 'Non spécifiée' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Heure d'arrivée :</th>
+                                        <td>{{ participation_evenement.heureArrivee ? participation_evenement.heureArrivee|date('H:i') : 'Non spécifiée' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Heure de départ :</th>
+                                        <td>{{ participation_evenement.heureDepart ? participation_evenement.heureDepart|date('H:i') : 'Non spécifiée' }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5 class="card-title">Feedback</h5>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th width="40%">Note :</th>
+                                        <td>
+                                            {% if participation_evenement.feedbackNote %}
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-info me-2">{{ participation_evenement.feedbackNote }}/10</span>
+                                                    <div class="progress flex-grow-1" style="height: 10px;">
+                                                        <div class="progress-bar bg-info" style="width: {{ participation_evenement.feedbackNote * 10 }}%"></div>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">Non noté</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Commentaire :</th>
+                                        <td>
+                                            {% if participation_evenement.feedbackCommentaire %}
+                                                <div class="alert alert-light border">
+                                                    {{ participation_evenement.feedbackCommentaire }}
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">Aucun commentaire</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
 
-    <a href="{{ path('app_participation_evenement_index') }}">back to list</a>
+                        <!-- Informations de l'événement -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="card-title">
+                                    <i class="bi bi-calendar-event me-2"></i>
+                                    Événement associé
+                                </h5>
+                                {% if participation_evenement.evenement %}
+                                    <div class="card border">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6 class="mb-1">{{ participation_evenement.evenement.titre }}</h6>
+                                                    {% if participation_evenement.evenement.description %}
+                                                        <p class="text-muted mb-2">{{ participation_evenement.evenement.description }}</p>
+                                                    {% endif %}
+                                                    <div class="d-flex gap-2 mb-2">
+                                                        <span class="badge bg-info">
+                                                            {{ participation_evenement.evenement.typeEvenement.value|capitalize }}
+                                                        </span>
+                                                        <span class="badge bg-secondary">
+                                                            Capacité : {{ participation_evenement.evenement.capaciteMax }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <table class="table table-sm table-borderless">
+                                                        <tr>
+                                                            <th width="40%">Date début :</th>
+                                                            <td>{{ participation_evenement.evenement.dateDebut|date('d/m/Y H:i') }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Date fin :</th>
+                                                            <td>{{ participation_evenement.evenement.dateFin|date('d/m/Y H:i') }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Lieu :</th>
+                                                            <td>{{ participation_evenement.evenement.lieu|default('Non spécifié') }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Créateur :</th>
+                                                            <td>{{ participation_evenement.evenement.createur ? participation_evenement.evenement.createur.email : 'Anonyme' }}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="mt-2">
+                                                <a href="{{ path('app_evenement_show', {'id': participation_evenement.evenement.id}) }}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye me-1"></i> Voir l'événement
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        Aucun événement associé à cette participation
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
 
-    <a href="{{ path('app_participation_evenement_edit', {'id': participation_evenement.id}) }}">edit</a>
+                        <!-- Informations de l'utilisateur -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="card-title">
+                                    <i class="bi bi-person me-2"></i>
+                                    Utilisateur
+                                </h5>
+                                {% if participation_evenement.utilisateur %}
+                                    <div class="card border">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6 class="mb-1">{{ participation_evenement.utilisateur.email }}</h6>
+                                                    <div class="d-flex gap-2 mb-2">
+                                                        <span class="badge bg-primary">Utilisateur</span>
+                                                        {% if participation_evenement.utilisateur.nom or participation_evenement.utilisateur.prenom %}
+                                                            <span class="badge bg-secondary">
+                                                                {{ participation_evenement.utilisateur.prenom }} {{ participation_evenement.utilisateur.nom }}
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <table class="table table-sm table-borderless">
+                                                        <tr>
+                                                            <th width="40%">Email :</th>
+                                                            <td>{{ participation_evenement.utilisateur.email }}</td>
+                                                        </tr>
+                                                        {% if participation_evenement.utilisateur.telephone %}
+                                                            <tr>
+                                                                <th>Téléphone :</th>
+                                                                <td>{{ participation_evenement.utilisateur.telephone }}</td>
+                                                            </tr>
+                                                        {% endif %}
+                                                        <tr>
+                                                            <th>Inscrit le :</th>
+                                                            <td>
+                                                                {% if participation_evenement.utilisateur.dateInscription %}
+                                                                    {{ participation_evenement.utilisateur.dateInscription|date('d/m/Y') }}
+                                                                {% else %}
+                                                                    Non spécifié
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        Aucun utilisateur associé à cette participation
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-white border-top">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Dernière mise à jour : {{ participation_evenement.updatedAt ? participation_evenement.updatedAt|date('d/m/Y H:i') : 'Jamais' }}
+                            </small>
+                            <div class="btn-group">
+                                <a href="{{ path('app_participation_evenement_edit', {'id': participation_evenement.id}) }}" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-pencil me-1"></i> Modifier
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-primary btn-sm dropdown-toggle dropdown-toggle-split" 
+                                        data-bs-toggle="dropdown">
+                                    <span class="visually-hidden">Options</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="#" onclick="window.print()">
+                                            <i class="bi bi-printer me-2"></i> Imprimer
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bi bi-download me-2"></i> Exporter
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="post" 
+                                              action="{{ path('app_participation_evenement_delete', {'id': participation_evenement.id}) }}" 
+                                              class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ participation_evenement.id) }}">
+                                            <button type="submit" 
+                                                    class="dropdown-item text-danger"
+                                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette participation ?')">
+                                                <i class="bi bi-trash me-2"></i> Supprimer
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    {{ include('participation_evenement/_delete_form.html.twig') }}
+    <style>
+        .card {
+            border-radius: 10px;
+        }
+        .badge {
+            font-size: 0.9em;
+            padding: 0.4em 0.8em;
+        }
+        th {
+            font-weight: 600;
+            color: #6c757d;
+        }
+        .progress {
+            max-width: 200px;
+        }
+    </style>
 {% endblock %}

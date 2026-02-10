@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/participation-evenement')]
 final class ParticipationEvenementController extends AbstractController
 {
+    
     #[Route(name: 'app_participation_evenement_index', methods: ['GET'])]
     public function index(ParticipationEvenementRepository $participationEvenementRepository): Response
     {
@@ -103,6 +104,7 @@ final class ParticipationEvenementController extends AbstractController
         ]);
     }
 
+    
     #[Route('/{id}/edit', name: 'app_participation_evenement_edit', methods: ['GET', 'POST'])]
     public function edit(
         Request $request,

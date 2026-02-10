@@ -81,13 +81,13 @@
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link text-white {% if app.request.attributes.get('_route') == 'app_evenement_calendar' %}active bg-primary{% endif %}" 
-                                           href="{{ path('app_evenement_calendar') }}">
+                                           href="#">
                                             <i class="bi bi-calendar-week me-2"></i> Calendrier
                                         </a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link text-white {% if app.request.attributes.get('_route') == 'app_evenement_statistics' %}active bg-primary{% endif %}" 
-                                           href="{{ path('app_evenement_statistics') }}">
+                                           href="#">
                                             <i class="bi bi-bar-chart me-2"></i> Statistiques
                                         </a>
                                     </li>
@@ -245,12 +245,12 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item" href="{{ path('app_evenement_calendar') }}">
+                                    <a class="dropdown-item" href="#">
                                         <i class="bi bi-calendar-week me-2"></i> Vue calendrier
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ path('app_evenement_statistics') }}">
+                                    <a class="dropdown-item" href="#">
                                         <i class="bi bi-bar-chart me-2"></i> Statistiques
                                     </a>
                                 </li>
@@ -261,7 +261,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ path('app_evenement_import') }}">
+                                    <a class="dropdown-item" href="#">
                                         <i class="bi bi-upload me-2"></i> Importer
                                     </a>
                                 </li>
