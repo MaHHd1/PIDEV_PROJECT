@@ -1,0 +1,115 @@
+
+{% extends 'base_enseignant.html.twig' %}
+
+{% block title %}Liste des scores{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Liste des scores</h1>
+    <a href="{{ path('app_score_new') }}" class="btn btn-warning">
+        + Nouveau score
+    </a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Rechercher par étudiant, évaluation..." value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <select name="sort" class="form-control">
+                    <option value="dateCorrection" {% if sortBy == 'dateCorrection' %}selected{% endif %}>Date de correction</option>
+                    <option value="note" {% if sortBy == 'note' %}selected{% endif %}>Note</option>
+                    <option value="statutCorrection" {% if sortBy == 'statutCorrection' %}selected{% endif %}>Statut</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="order" class="form-control">
+                    <option value="ASC" {% if order == 'ASC' %}selected{% endif %}>Croissant</option>
+                    <option value="DESC" {% if order == 'DESC' %}selected{% endif %}>Décroissant</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-secondary w-100">Filtrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Évaluation</th>
+                <th>Étudiant</th>
+                <th>Note</th>
+                <th>Pourcentage</th>
+                <th>Mention</th>
+                <th>Statut</th>
+                <th>Date correction</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for score in scores %}
+            <tr>
+                <td>{{ score.id }}</td>
+                <td>{{ score.soumission.evaluation.titre }}</td>
+                <td>{{ score.soumission.idEtudiant }}</td>
+                <td>
+                    <strong>{{ score.note }}/{{ score.noteSur }}</strong>
+                </td>
+                <td>
+                    {% set pourcentage = score.pourcentage %}
+                    {% if pourcentage is not null %}
+                        <span class="badge {% if pourcentage >= 50 %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ pourcentage }}%
+                        </span>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% set mention = score.mention %}
+                    {% if mention == 'Excellent' %}
+                        <span class="badge bg-primary">{{ mention }}</span>
+                    {% elseif mention == 'Très bien' %}
+                        <span class="badge bg-success">{{ mention }}</span>
+                    {% elseif mention == 'Bien' %}
+                        <span class="badge bg-info">{{ mention }}</span>
+                    {% elseif mention == 'Assez bien' %}
+                        <span class="badge bg-warning">{{ mention }}</span>
+                    {% elseif mention == 'Passable' %}
+                        <span class="badge bg-secondary">{{ mention }}</span>
+                    {% else %}
+                        <span class="badge bg-danger">{{ mention }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if score.statutCorrection == 'corrige' %}
+                        <span class="badge bg-success">Corrigé</span>
+                    {% else %}
+                        <span class="badge bg-warning">À corriger</span>
+                    {% endif %}
+                </td>
+                <td>{{ score.dateCorrection|date('d/m/Y H:i') }}</td>
+                <td>
+                    <a href="{{ path('app_score_show', {'id': score.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                    <a href="{{ path('app_score_edit', {'id': score.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                    <form method="post" action="{{ path('app_score_delete', {'id': score.id}) }}" style="display:inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ score.id) }}">
+                        <button class="btn btn-sm btn-danger" onclick="return confirm('Supprimer ce score ?');">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" class="text-center">Aucun score trouvé</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

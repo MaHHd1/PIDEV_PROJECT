@@ -1,0 +1,148 @@
+{# templates/score/show.html.twig #}
+{% extends 'base_enseignant.html.twig' %}
+
+{% block title %}Détails du score{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Détails du score</h1>
+        <div>
+            <a href="{{ path('app_score_edit', {'id': score.id}) }}" class="btn btn-warning">
+                Modifier
+            </a>
+            <a href="{{ path('app_score_index') }}" class="btn btn-secondary">
+                Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-warning text-dark">
+            <h3 class="mb-0">Score #{{ score.id }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Informations de l'évaluation</h4>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th width="40%">Évaluation</th>
+                                <td>{{ score.soumission.evaluation.titre }}</td>
+                            </tr>
+                            <tr>
+                                <th>Type</th>
+                                <td>
+                                    <span class="badge bg-info">
+                                        {{ score.soumission.evaluation.typeEvaluation }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Étudiant</th>
+                                <td><strong>{{ score.soumission.idEtudiant }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Date de soumission</th>
+                                <td>{{ score.soumission.dateSoumission|date('d/m/Y H:i') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-md-6">
+                    <h4>Notation</h4>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th width="40%">Note obtenue</th>
+                                <td>
+                                    <h3 class="mb-0">
+                                        <span class="badge {% if score.estReussi %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ score.note }}/{{ score.noteSur }}
+                                        </span>
+                                    </h3>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Pourcentage</th>
+                                <td>
+                                    <h4 class="mb-0">{{ score.pourcentage }}%</h4>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Mention</th>
+                                <td>
+                                    {% set mention = score.mention %}
+                                    {% if mention == 'Excellent' %}
+                                        <span class="badge bg-primary fs-5">{{ mention }}</span>
+                                    {% elseif mention == 'Très bien' %}
+                                        <span class="badge bg-success fs-5">{{ mention }}</span>
+                                    {% elseif mention == 'Bien' %}
+                                        <span class="badge bg-info fs-5">{{ mention }}</span>
+                                    {% elseif mention == 'Assez bien' %}
+                                        <span class="badge bg-warning fs-5">{{ mention }}</span>
+                                    {% elseif mention == 'Passable' %}
+                                        <span class="badge bg-secondary fs-5">{{ mention }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger fs-5">{{ mention }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Résultat</th>
+                                <td>
+                                    {% if score.estReussi %}
+                                        <span class="badge bg-success fs-5">✓ RÉUSSI</span>
+                                    {% else %}
+                                        <span class="badge bg-danger fs-5">✗ ÉCHOUÉ</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Statut de correction</th>
+                                <td>
+                                    {% if score.statutCorrection == 'corrige' %}
+                                        <span class="badge bg-success">Corrigé</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">À corriger</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Date de correction</th>
+                                <td>{{ score.dateCorrection|date('d/m/Y H:i') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if score.commentaireEnseignant %}
+            <div class="mt-4">
+                <h4>Commentaire de l'enseignant</h4>
+                <div class="alert alert-info">
+                    {{ score.commentaireEnseignant|nl2br }}
+                </div>
+            </div>
+            {% else %}
+            <div class="mt-4">
+                <div class="alert alert-warning">
+                    Aucun commentaire de l'enseignant
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="card-footer">
+            <form method="post" action="{{ path('app_score_delete', {'id': score.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce score ?');" class="d-inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ score.id) }}">
+                <button class="btn btn-danger">Supprimer</button>
+            </form>
+            <a href="{{ path('app_score_edit', {'id': score.id}) }}" class="btn btn-warning">Modifier</a>
+            <a href="{{ path('app_score_index') }}" class="btn btn-secondary">Retour</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base_enseignant.html.twig' %}
+
+{% block title %}Modifier le score{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1>Modifier le score</h1>
+
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <div class="card mt-4">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">Formulaire de modification</h4>
+            </div>
+            <div class="card-body">
+                {# Sélection de la soumission #}
+                <div class="mb-3">
+                    {{ form_row(form.soumission) }}
+                </div>
+
+                {# Détails de la soumission #}
+                <div id="soumission-details" class="alert alert-info" style="display:none;">
+                    <p><strong>Fichier soumis :</strong> <span id="fichier"></span></p>
+                    <p><strong>Commentaire :</strong> <span id="commentaire"></span></p>
+                </div>
+
+                {# Notes #}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form_row(form.note) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.noteSur) }}
+                    </div>
+                </div>
+
+                {{ form_row(form.commentaireEnseignant) }}
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-warning">Mettre à jour</button>
+            <a href="{{ path('app_score_index') }}" class="btn btn-secondary">Annuler</a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{# JS pour afficher dynamiquement les détails de la soumission sélectionnée #}
+<script>
+    const select = document.getElementById('{{ form.soumission.vars.id }}');
+    const detailsDiv = document.getElementById('soumission-details');
+    const fichierSpan = document.getElementById('fichier');
+    const commentaireSpan = document.getElementById('commentaire');
+
+    const soumissionsData = {
+        {% for s in form.soumission.vars.choices %}
+            '{{ s.value }}': {
+                'fichier': '{{ s.data.fichierSoumissionUrl|default("Pas de fichier") }}',
+                'commentaire': '{{ s.data.commentaireEtudiant|default("Pas de commentaire")|e('js') }}'
+            },
+        {% endfor %}
+    };
+
+    select.addEventListener('change', function() {
+        const value = this.value;
+        if(soumissionsData[value]) {
+            detailsDiv.style.display = 'block';
+            fichierSpan.textContent = soumissionsData[value].fichier;
+            commentaireSpan.textContent = soumissionsData[value].commentaire;
+        } else {
+            detailsDiv.style.display = 'none';
+        }
+    });
+
+    // Trigger initial display
+    select.dispatchEvent(new Event('change'));
+</script>
+{% endblock %}
