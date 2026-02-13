@@ -60,23 +60,27 @@
                 <div class="navbar-collapse w-100 collapse" id="navbarCollapse">
                     <!-- Nav Main menu START -->
                     <ul class="navbar-nav navbar-nav-scroll mx-auto">
-                        {% block navbar_menu %}
-                            <li class="nav-item">
-                                <a class="nav-link {{ app.request.get('_route') == 'app_etudiant_dashboard' ? 'active' : '' }}" href="{{ path('app_etudiant_dashboard') }}">Tableau de Bord</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ app.request.get('_route') == 'app_etudiant_courses' ? 'active' : '' }}" href="{{ path('app_etudiant_courses') }}">Mes Cours</a>
-                            </li>
-                             <li class="nav-item">
-                                <a class="nav-link {{ app.request.get('_route') == 'quiz_index' ? 'active' : '' }}" href="{{ path('quiz_index') }}">Mes quizs</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ app.request.get('_route') == 'app_etudiant_grades' ? 'active' : '' }}" href="{{ path('app_etudiant_grades') }}">Mes Notes</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ app.request.get('_route') == 'app_etudiant_profile' ? 'active' : '' }}" href="{{ path('app_etudiant_profile') }}">Mon Profil</a>
-                            </li>
-                        {% endblock %}
+                    {% block navbar_menu %}
+    <li class="nav-item">
+        <a class="nav-link {{ app.request.get('_route') == 'app_etudiant_dashboard' ? 'active' : '' }}" href="{{ path('app_etudiant_dashboard') }}">Tableau de Bord</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ app.request.get('_route') == 'app_etudiant_courses' ? 'active' : '' }}" href="{{ path('app_etudiant_courses') }}">Mes Cours</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ app.request.get('_route') starts with 'app_soumission' ? 'active' : '' }}" href="{{ path('app_soumission_index') }}">Mes Soumissions</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ app.request.get('_route') starts with 'app_score' ? 'active' : '' }}" href="{{ path('app_score_index') }}">Mes Notes</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ app.request.get('_route') starts with 'app_participation_evenement_index' or app.request.get('_route') starts with 'app_participation_evenement' ? 'active' : '' }}" href="{{ path('app_participation_evenement_index') }}">Événements</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ app.request.get('_route') == 'app_etudiant_profile' ? 'active' : '' }}" href="{{ path('app_etudiant_profile') }}">Mon Profil</a>
+    </li>
+{% endblock %}
+
                     </ul>
                     <!-- Nav Main menu END -->
 
@@ -231,17 +235,20 @@
                                         <a class="list-group-item {{ app.request.get('_route') == 'quiz_index' ? 'active' : '' }}" href="{{ path('quiz_index') }}">
                                             <i class="bi bi-question-circle fa-fw me-2"></i>Mes quizs
                                         </a>
-                                        <a class="list-group-item {{ app.request.get('_route') == 'app_etudiant_grades' ? 'active' : '' }}" href="{{ path('app_etudiant_grades') }}">
+                                        <a class="list-group-item {{ app.request.get('_route') starts with 'app_soumission' ? 'active' : '' }}" href="{{ path('app_soumission_index') }}">
+                                            <i class="bi bi-file-earmark-text fa-fw me-2"></i>Mes Soumissions
+                                        </a>
+                                        <a class="list-group-item {{ app.request.get('_route') starts with 'app_score' ? 'active' : '' }}" href="{{ path('app_score_index') }}">
                                             <i class="bi bi-clipboard-data fa-fw me-2"></i>Mes Notes
+                                        </a>
+                                        <a class="list-group-item {{ app.request.get('_route') starts with 'app_evenement' or app.request.get('_route') starts with 'app_participation_evenement' ? 'active' : '' }}" href="{{ path('app_participation_evenement_index') }}">
+                                            <i class="bi bi-calendar-event fa-fw me-2"></i>Événements
                                         </a>
                                         <a class="list-group-item {{ app.request.get('_route') == 'app_etudiant_profile' ? 'active' : '' }}" href="{{ path('app_etudiant_profile') }}">
                                             <i class="bi bi-person fa-fw me-2"></i>Mon Profil
                                         </a>
                                         <a class="list-group-item {{ app.request.get('_route') == 'app_etudiant_change_password' ? 'active' : '' }}" href="{{ path('app_etudiant_change_password') }}">
                                             <i class="bi bi-key fa-fw me-2"></i>Changer Mot de Passe
-                                        </a>
-                                        <a class="list-group-item" href="#">
-                                            <i class="bi bi-calendar-event fa-fw me-2"></i>Emploi du Temps
                                         </a>
                                         <a class="list-group-item" href="#">
                                             <i class="bi bi-chat-dots fa-fw me-2"></i>Messagerie
@@ -280,13 +287,13 @@
                 <!-- Widget -->
                 <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
                     <!-- Logo START -->
-                    <a href="{{ path('app_home') }}"> <img class="h-20px" src="/assets/images/logo-light.svg" alt="logo"> </a>
+                    <a href="{{ path('app_home') }}"> <img class="h-20px" src="/assets/images/logo.jpg alt="logo"> </a>
                 </div>
 
                 <!-- Widget -->
                 <div class="col-md-4 mb-3 mb-md-0">
                     <div class="text-center text-white text-primary-hover">
-                        Copyrights ©2023 Eduport. Plateforme Étudiante.
+                        Copyrights ©2026 NovaLearn. Plateforme Étudiante.
                     </div>
                 </div>
                 <!-- Widget -->

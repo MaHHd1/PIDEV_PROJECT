@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
@@ -82,12 +84,20 @@ abstract class Utilisateur
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $lastLogin = null;
 
+    // COLLECTION DES EVENEMENTS CREE PAR L'UTILISATEUR
+    #[ORM\OneToMany(mappedBy: "createur", targetEntity: Evenement::class)]
+    private Collection $evenementsCrees;
+
     public function __construct()
     {
         $this->dateCreation = new \DateTime();
+        $this->evenementsCrees = new ArrayCollection();
     }
 
-    // Getters and Setters
+    // ============================
+    // Getters & Setters
+    // ============================
+
     public function getId(): ?int
     {
         return $this->id;
@@ -148,7 +158,6 @@ abstract class Utilisateur
         return $this;
     }
 
-    // NEW METHODS FOR PASSWORD RESET
     public function getResetToken(): ?string
     {
         return $this->resetToken;
@@ -182,13 +191,15 @@ abstract class Utilisateur
         return $this;
     }
 
-    // HELPER METHODS
+    // ============================
+    // Helper methods
+    // ============================
+
     public function getNomComplet(): string
     {
         return $this->prenom . ' ' . $this->nom;
     }
 
-    // Get user type (etudiant, enseignant, or administrateur)
     public function getType(): string
     {
         if ($this instanceof Etudiant) {
@@ -202,7 +213,6 @@ abstract class Utilisateur
         return 'unknown';
     }
 
-    // Check if reset token is valid
     public function isResetTokenValid(): bool
     {
         if (!$this->resetToken || !$this->resetTokenExpiresAt) {
@@ -210,5 +220,38 @@ abstract class Utilisateur
         }
 
         return $this->resetTokenExpiresAt > new \DateTime();
+    }
+
+    // ============================
+    // Evenements Crees
+    // ============================
+
+    /**
+     * @return Collection<int, Evenement>
+     */
+    public function getEvenementsCrees(): Collection
+    {
+        return $this->evenementsCrees;
+    }
+
+    public function addEvenementCree(Evenement $evenement): self
+    {
+        if (!$this->evenementsCrees->contains($evenement)) {
+            $this->evenementsCrees->add($evenement);
+            $evenement->setCreateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvenementCree(Evenement $evenement): self
+    {
+        if ($this->evenementsCrees->removeElement($evenement)) {
+            if ($evenement->getCreateur() === $this) {
+                $evenement->setCreateur(null);
+            }
+        }
+
+        return $this;
     }
 }

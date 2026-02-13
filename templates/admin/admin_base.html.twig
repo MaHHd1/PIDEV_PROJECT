@@ -107,6 +107,13 @@
                             </a>
                         </li>
 
+                        <!-- Événements -->
+                        <li class="nav-item">
+                            <a href="{{ path('app_evenement_index') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'app_evenement' %}active{% endif %}">
+                                <i class="bi bi-calendar-event fa-fw me-2"></i>Événements
+                            </a>
+                        </li>
+
                         <!-- Profile -->
                         <li class="nav-item">
                             <a href="{{ path('app_administrateur_profile') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_administrateur_profile' %}active{% endif %}">
@@ -354,6 +361,7 @@
                                             <li><a class="dropdown-item" href="{{ path('app_administrateur_profile') }}"><i class="bi bi-person-circle fa-fw me-2"></i>Mon Profil</a></li>
                                             <li><a class="dropdown-item" href="{{ path('app_administrateur_utilisateurs') }}"><i class="fas fa-users fa-fw me-2"></i>Gérer les utilisateurs</a></li>
                                             <li><a class="dropdown-item" href="{{ path('app_administrateur_statistiques') }}"><i class="bi bi-bar-chart fa-fw me-2"></i>Statistiques</a></li>
+                                            <li><a class="dropdown-item" href="{{ path('app_evenement_index') }}"><i class="bi bi-calendar-event fa-fw me-2"></i>Événements</a></li>
                                             <li> <hr class="dropdown-divider"></li>
                                             <li><a class="dropdown-item" href="{{ path('app_home') }}"><i class="bi bi-house fa-fw me-2"></i>Site public</a></li>
                                             <li> <hr class="dropdown-divider"></li>

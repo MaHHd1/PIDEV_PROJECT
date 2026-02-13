@@ -2,13 +2,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{% block title %}Eduport - LMS, Education and Course Theme{% endblock %}</title>
+    <title>{% block title %}NovaLearn - LMS, Education and Course Theme{% endblock %}</title>
 
     <!-- Meta Tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="author" content="Webestica.com">
-    <meta name="description" content="Eduport- LMS, Education and Course Theme">
+    <meta name="description" content="NovaLearn- LMS, Education and Course Theme">
 
     <!-- Dark mode -->
     <script>
@@ -89,6 +89,11 @@
 
     <!-- Theme CSS -->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Optionnel pour la localisation française -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.css">
 
     {% block stylesheets %}{% endblock %}
 </head>
@@ -113,5 +118,23 @@
 <script src="{{ asset('assets/js/functions.js') }}"></script>
 
 {% block javascripts %}{% endblock %}
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof flatpickr !== 'undefined') {
+        flatpickr('.datetimepicker', {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+            locale: "fr",
+            minDate: "today"
+        });
+    }
+});
+</script>
+
 </body>
 </html>

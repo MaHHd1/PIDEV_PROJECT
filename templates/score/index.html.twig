@@ -1,0 +1,6 @@
+{# templates/score/index.html.twig #}
+{% if enseignant is defined %}
+    {% include 'score/_index_enseignant.html.twig' %}
+{% else %}
+    {% include 'score/_index_etudiant.html.twig' %}
+{% endif %}

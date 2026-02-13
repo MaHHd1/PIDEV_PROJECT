@@ -1,4 +1,4 @@
-{# prof_base.html.twig #}
+{# templates/enseignant/prof_base.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block body %}
@@ -9,8 +9,7 @@
             <div class="container">
                 <!-- Logo START -->
                 <a class="navbar-brand" href="{{ path('app_enseignant_dashboard') }}">
-                    <img class="light-mode-item navbar-brand-item" src="/assets/images/logo.svg" alt="logo">
-                    <img class="dark-mode-item navbar-brand-item" src="/assets/images/logo-light.svg" alt="logo">
+                    <img class="light-mode-item navbar-brand-item" src="/assets/images/logo.jpg" alt="logo">
                 </a>
                 <!-- Logo END -->
 
@@ -36,12 +35,20 @@
                         <li class="nav-item">
                             <a class="nav-link {% if app.request.attributes.get('_route') == 'app_enseignant_liste_etudiants' %}active{% endif %}" href="{{ path('app_enseignant_liste_etudiants') }}">Mes Étudiants</a>
                         </li>
-                        <!-- ADDED: Quiz link -->
                         <li class="nav-item">
                             <a class="nav-link {% if app.request.attributes.get('_route') == 'teacher_quiz_index' %}active{% endif %}" href="{{ path('teacher_quiz_index') }}">Mes Quiz</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if app.request.attributes.get('_route') == 'app_enseignant_notes' %}active{% endif %}" href="#">Notes & Évaluations</a>
+                            <a class="nav-link {% if app.request.attributes.get('_route') starts with 'app_evaluation' %}active{% endif %}" href="{{ path('app_evaluation_index') }}">Mes Évaluations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if app.request.attributes.get('_route') starts with 'app_soumission' %}active{% endif %}" href="{{ path('app_soumission_index') }}">Soumissions</a>
+                        </li>
+                         <li class="nav-item">
+        <a class="nav-link {{ app.request.get('_route') starts with 'app_participation_evenement_index' or app.request.get('_route') starts with 'app_participation_evenement' ? 'active' : '' }}" href="{{ path('app_participation_evenement_index') }}">Événements</a>
+    </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if app.request.attributes.get('_route') starts with 'app_score' %}active{% endif %}" href="{{ path('app_score_index') }}">Corrections</a>
                         </li>
                     </ul>
                     <!-- Nav Main menu END -->
@@ -171,10 +178,21 @@
                                     <a class="list-group-item {% if app.request.attributes.get('_route') == 'app_enseignant_liste_etudiants' %}active{% endif %}" href="{{ path('app_enseignant_liste_etudiants') }}">
                                         <i class="bi bi-people fa-fw me-2"></i>Mes Étudiants
                                     </a>
-                                    <!-- UPDATED: Quiz link with correct route -->
                                     <a class="list-group-item {% if app.request.attributes.get('_route') == 'teacher_quiz_index' %}active{% endif %}" href="{{ path('teacher_quiz_index') }}">
                                         <i class="bi bi-question-diamond fa-fw me-2"></i>Mes Quiz
                                     </a>
+                                    <a class="list-group-item {% if app.request.attributes.get('_route') starts with 'app_evaluation' %}active{% endif %}" href="{{ path('app_evaluation_index') }}">
+                                        <i class="bi bi-clipboard-check fa-fw me-2"></i>Mes Évaluations
+                                    </a>
+                                    <a class="list-group-item {% if app.request.attributes.get('_route') starts with 'app_soumission' %}active{% endif %}" href="{{ path('app_soumission_index') }}">
+                                        <i class="bi bi-file-earmark-text fa-fw me-2"></i>Soumissions reçues
+                                    </a>
+                                    <a class="list-group-item {% if app.request.attributes.get('_route') starts with 'app_score' %}active{% endif %}" href="{{ path('app_score_index') }}">
+                                        <i class="bi bi-star-fill fa-fw me-2"></i>Mes Corrections
+                                    </a>
+                                     <a class="list-group-item {{ app.request.get('_route') starts with 'app_evenement' or app.request.get('_route') starts with 'app_participation_evenement' ? 'active' : '' }}" href="{{ path('app_participation_evenement_index') }}">
+                                            <i class="bi bi-calendar-event fa-fw me-2"></i>Événements
+                                        </a>
                                     <a class="list-group-item {% if app.request.attributes.get('_route') == 'app_enseignant_revenus' %}active{% endif %}" href="#">
                                         <i class="bi bi-graph-up fa-fw me-2"></i>Revenus
                                     </a>
