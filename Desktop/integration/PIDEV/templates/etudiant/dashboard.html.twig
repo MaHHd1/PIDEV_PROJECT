@@ -1,0 +1,238 @@
+{% extends 'etudiant/student_base.html.twig' %}
+
+{% block title %}Tableau de Bord Étudiant - Eduport{% endblock %}
+
+{% block banner %}
+    <!-- Override the banner block for dashboard -->
+    <section class="pt-0">
+        <div class="container-fluid px-0">
+            <div class="card bg-blue h-100px h-md-200px rounded-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            </div>
+        </div>
+        <div class="container mt-n4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card bg-transparent card-body pb-0 px-0 mt-2 mt-sm-0">
+                        <div class="row d-sm-flex justify-sm-content-between mt-2 mt-md-0">
+                            <!-- Avatar -->
+                            <div class="col-auto">
+                                <div class="avatar avatar-xxl position-relative mt-n3">
+                                    <div class="avatar-img rounded-circle border border-white border-3 shadow bg-primary text-white d-flex align-items-center justify-content-center" style="width: 120px; height: 120px; font-size: 3rem;">
+                                        {{ student.prenom|first|upper }}{{ student.nom|first|upper }}
+                                    </div>
+                                    <span class="badge text-bg-success rounded-pill position-absolute top-50 start-100 translate-middle mt-4 mt-md-5 ms-n3 px-md-3">{{ student.niveauEtude }}</span>
+                                </div>
+                            </div>
+                            <!-- Profile info -->
+                            <div class="col d-sm-flex justify-content-between align-items-center">
+                                <div>
+                                    <h1 class="my-1 fs-4">{{ student.prenom }} {{ student.nom }}</h1>
+                                    <ul class="list-inline mb-0">
+                                        <li class="list-inline-item me-3 mb-1 mb-sm-0">
+                                            <span class="h6">{{ student.matricule }}</span>
+                                            <span class="text-body fw-light">Matricule</span>
+                                        </li>
+                                        <li class="list-inline-item me-3 mb-1 mb-sm-0">
+                                            <span class="h6">{{ student.niveauEtude }}</span>
+                                            <span class="text-body fw-light">Niveau</span>
+                                        </li>
+                                        <li class="list-inline-item me-3 mb-1 mb-sm-0">
+                                            <span class="h6">{{ student.specialisation }}</span>
+                                            <span class="text-body fw-light">Spécialisation</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <!-- Button -->
+                                <div class="mt-2 mt-sm-0">
+                                    <a href="{{ path('app_etudiant_profile') }}" class="btn btn-outline-primary mb-0">Voir mon profil</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced filter responsive toggler START -->
+                    <hr class="d-xl-none">
+                    <div class="col-12 col-xl-3 d-flex justify-content-between align-items-center">
+                        <a class="h6 mb-0 fw-bold d-xl-none" href="#">Menu</a>
+                        <button class="btn btn-primary d-xl-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+                            <i class="fas fa-sliders-h"></i>
+                        </button>
+                    </div>
+                    <!-- Advanced filter responsive toggler END -->
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block student_content %}
+    <!-- Counter boxes START -->
+    <div class="row mb-4">
+        <!-- Counter item -->
+        <div class="col-sm-6 col-lg-4 mb-3 mb-lg-0">
+            <div class="d-flex justify-content-center align-items-center p-4 bg-orange bg-opacity-15 rounded-3">
+                <span class="display-6 lh-1 text-orange mb-0"><i class="fas fa-book fa-fw"></i></span>
+                <div class="ms-4">
+                    <div class="d-flex">
+                        <h5 class="mb-0 fw-bold">5</h5>
+                    </div>
+                    <p class="mb-0 h6 fw-light">Cours Inscrits</p>
+                </div>
+            </div>
+        </div>
+        <!-- Counter item -->
+        <div class="col-sm-6 col-lg-4 mb-3 mb-lg-0">
+            <div class="d-flex justify-content-center align-items-center p-4 bg-purple bg-opacity-15 rounded-3">
+                <span class="display-6 lh-1 text-purple mb-0"><i class="fas fa-clipboard-check fa-fw"></i></span>
+                <div class="ms-4">
+                    <div class="d-flex">
+                        <h5 class="mb-0 fw-bold">3</h5>
+                    </div>
+                    <p class="mb-0 h6 fw-light">Cours Terminés</p>
+                </div>
+            </div>
+        </div>
+        <!-- Counter item -->
+        <div class="col-sm-6 col-lg-4 mb-3 mb-lg-0">
+            <div class="d-flex justify-content-center align-items-center p-4 bg-success bg-opacity-10 rounded-3">
+                <span class="display-6 lh-1 text-success mb-0"><i class="fas fa-chart-line fa-fw"></i></span>
+                <div class="ms-4">
+                    <div class="d-flex">
+                        <h5 class="mb-0 fw-bold">14.5</h5>
+                    </div>
+                    <p class="mb-0 h6 fw-light">Moyenne Générale</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Counter boxes END -->
+
+    <!-- Welcome Card START -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3 class="card-title">Bienvenue, {{ student.prenom }} !</h3>
+                    <p class="card-text">
+                        Vous êtes actuellement inscrit en <strong>{{ student.niveauEtude }}</strong> en spécialité <strong>{{ student.specialisation }}</strong>.
+                    </p>
+                    <p class="card-text">
+                        Date d'inscription : {{ student.dateInscription|date('d/m/Y') }}
+                    </p>
+                    <a href="{{ path('app_etudiant_courses') }}" class="btn btn-primary">Voir mes cours</a>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="display-1 text-primary">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Welcome Card END -->
+
+    <!-- Recent Courses START -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title mb-0">Mes Cours Récents</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Cours</th>
+                        <th>Professeur</th>
+                        <th>Progression</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm me-3">
+                                    <div class="avatar-img rounded-circle bg-info text-white d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-code"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Programmation Web</h6>
+                                    <small class="text-muted">Développement</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Dr. Martin</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                    <div class="progress-bar bg-success" style="width: 75%"></div>
+                                </div>
+                                <span class="small">75%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-primary">Continuer</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm me-3">
+                                    <div class="avatar-img rounded-circle bg-warning text-white d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Bases de Données</h6>
+                                    <small class="text-muted">Informatique</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Prof. Dupont</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                    <div class="progress-bar bg-success" style="width: 50%"></div>
+                                </div>
+                                <span class="small">50%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-primary">Continuer</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm me-3">
+                                    <div class="avatar-img rounded-circle bg-danger text-white d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-network-wired"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Réseaux</h6>
+                                    <small class="text-muted">Informatique</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Dr. Sophie</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                    <div class="progress-bar bg-success" style="width: 25%"></div>
+                                </div>
+                                <span class="small">25%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-primary">Continuer</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Recent Courses END -->
+{% endblock %}

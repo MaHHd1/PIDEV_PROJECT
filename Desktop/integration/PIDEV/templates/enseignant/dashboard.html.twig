@@ -1,0 +1,288 @@
+{# dashboard.html.twig #}
+{% extends 'enseignant/prof_base.html.twig' %}
+
+{% block title %}Tableau de Bord Enseignant{% endblock %}
+
+{% block additional_styles %}
+    <style>
+        .bg-purple {
+            background-color: #6f42c1;
+        }
+        .bg-opacity-10 {
+            opacity: 0.1;
+        }
+        .bg-opacity-15 {
+            opacity: 0.15;
+        }
+        .text-purple {
+            color: #6f42c1 !important;
+        }
+        .text-orange {
+            color: #fd7e14 !important;
+        }
+        .bg-orange {
+            background-color: #fd7e14;
+        }
+        .table-responsive-title {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .offcanvas {
+            background-color: #1a1a1a;
+        }
+    </style>
+{% endblock %}
+
+{% block page_title %}{{ enseignant.prenom }} {{ enseignant.nom }}{% endblock %}
+
+{% block page_subtitle %}
+    <ul class="list-inline mb-0">
+        <li class="list-inline-item me-3 mb-1 mb-sm-0">
+            <span class="h6">{{ enseignant.matriculeEnseignant }}</span>
+            <span class="text-body fw-light">Matricule</span>
+        </li>
+        <li class="list-inline-item me-3 mb-1 mb-sm-0">
+            <span class="h6">{{ enseignant.diplome }}</span>
+            <span class="text-body fw-light">Diplôme</span>
+        </li>
+        <li class="list-inline-item me-3 mb-1 mb-sm-0">
+            <span class="h6">{{ enseignant.specialite }}</span>
+            <span class="text-body fw-light">Spécialité</span>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block page_actions %}
+    <a href="{{ path('app_enseignant_edit_profile') }}" class="btn btn-outline-primary mb-0">Voir mon profil</a>
+{% endblock %}
+
+{% block main_content %}
+    <!-- Counter boxes START -->
+    <div class="row mb-4">
+        <!-- Counter item -->
+        <div class="col-sm-6 col-lg-4 mb-3 mb-lg-0">
+            <div class="d-flex justify-content-center align-items-center p-4 bg-orange bg-opacity-15 rounded-3">
+                <span class="display-6 lh-1 text-orange mb-0"><i class="fas fa-book fa-fw"></i></span>
+                <div class="ms-4">
+                    <div class="d-flex">
+                        <h5 class="mb-0 fw-bold">8</h5>
+                    </div>
+                    <p class="mb-0 h6 fw-light">Cours Assignés</p>
+                </div>
+            </div>
+        </div>
+        <!-- Counter item -->
+        <div class="col-sm-6 col-lg-4 mb-3 mb-lg-0">
+            <div class="d-flex justify-content-center align-items-center p-4 bg-purple bg-opacity-15 rounded-3">
+                <span class="display-6 lh-1 text-purple mb-0"><i class="fas fa-user-graduate fa-fw"></i></span>
+                <div class="ms-4">
+                    <div class="d-flex">
+                        <h5 class="mb-0 fw-bold">245</h5>
+                    </div>
+                    <p class="mb-0 h6 fw-light">Étudiants Total</p>
+                </div>
+            </div>
+        </div>
+        <!-- Counter item -->
+        <div class="col-sm-6 col-lg-4 mb-3 mb-lg-0">
+            <div class="d-flex justify-content-center align-items-center p-4 bg-success bg-opacity-15 rounded-3">
+                <span class="display-6 lh-1 text-success mb-0"><i class="fas fa-chart-line fa-fw"></i></span>
+                <div class="ms-4">
+                    <div class="d-flex">
+                        <h5 class="mb-0 fw-bold">156</h5>
+                    </div>
+                    <p class="mb-0 h6 fw-light">Étudiants Actifs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Counter boxes END -->
+
+    <!-- Welcome Card START -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3 class="card-title">Bienvenue, {{ enseignant.prenom }} !</h3>
+                    <p class="card-text">
+                        Vous enseignez actuellement comme <strong>{{ enseignant.typeContrat }}</strong> en spécialité <strong>{{ enseignant.specialite }}</strong>.
+                    </p>
+                    <p class="card-text">
+                        Expérience : {{ enseignant.anneesExperience }} ans
+                    </p>
+                    <a href="{{ path('app_enseignant_liste_etudiants') }}" class="btn btn-primary">Voir mes étudiants</a>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="display-1 text-primary">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Welcome Card END -->
+
+    <!-- Recent Activity START -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title mb-0">Activités Récentes</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Activité</th>
+                        <th>Cours</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm me-3">
+                                    <div class="avatar-img rounded-circle bg-info text-white d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Correction des devoirs</h6>
+                                    <small class="text-muted">Évaluation</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Algorithmique Avancée</td>
+                        <td>15 Mars 2024</td>
+                        <td><span class="badge bg-success">Terminé</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm me-3">
+                                    <div class="avatar-img rounded-circle bg-warning text-white d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-chalkboard"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Préparation du cours</h6>
+                                    <small class="text-muted">Enseignement</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Base de Données</td>
+                        <td>14 Mars 2024</td>
+                        <td><span class="badge bg-warning">En cours</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm me-3">
+                                    <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Réunion département</h6>
+                                    <small class="text-muted">Administration</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Général</td>
+                        <td>13 Mars 2024</td>
+                        <td><span class="badge bg-success">Terminé</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Recent Activity END -->
+
+    <!-- Quick Stats START -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card border bg-transparent rounded-3 h-100">
+                <div class="card-header bg-transparent border-bottom">
+                    <h3 class="mb-0">Informations personnelles</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-borderless">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-envelope me-2"></i>Email</span>
+                            <span class="fw-bold">{{ enseignant.email }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-id-card me-2"></i>Matricule</span>
+                            <span class="fw-bold">{{ enseignant.matriculeEnseignant }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-certificate me-2"></i>Diplôme</span>
+                            <span class="fw-bold">{{ enseignant.diplome }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-briefcase me-2"></i>Spécialité</span>
+                            <span class="fw-bold">{{ enseignant.specialite }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-history me-2"></i>Expérience</span>
+                            <span class="fw-bold">{{ enseignant.anneesExperience }} ans</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-file-contract me-2"></i>Type de contrat</span>
+                            <span class="fw-bold">{{ enseignant.typeContrat }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-user-check me-2"></i>Statut</span>
+                            <span class="badge bg-success">{{ enseignant.statut|capitalize }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-4 mt-md-0">
+            <div class="card border bg-transparent rounded-3 h-100">
+                <div class="card-header bg-transparent border-bottom">
+                    <h3 class="mb-0">Actions rapides</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="#" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus-circle me-2"></i>Créer un nouveau cours
+                        </a>
+                        <a href="{{ path('app_enseignant_liste_etudiants') }}" class="btn btn-info btn-lg">
+                            <i class="fas fa-users me-2"></i>Voir tous les étudiants
+                        </a>
+                        <a href="{{ path('app_enseignant_edit_profile') }}" class="btn btn-warning btn-lg">
+                            <i class="fas fa-user-edit me-2"></i>Modifier mon profil
+                        </a>
+                        <a href="{{ path('app_enseignant_changer_password') }}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-key me-2"></i>Changer mon mot de passe
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Quick Stats END -->
+{% endblock %}
+
+{% block additional_javascripts %}
+    <script>
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const offcanvas = document.getElementById('offcanvasSidebar');
+            if (offcanvas) {
+                offcanvas.addEventListener('show.bs.offcanvas', function () {
+                    document.body.classList.add('offcanvas-open');
+                });
+                offcanvas.addEventListener('hidden.bs.offcanvas', function () {
+                    document.body.classList.remove('offcanvas-open');
+                });
+            }
+        });
+    </script>
+{% endblock %}

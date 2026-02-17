@@ -1,0 +1,367 @@
+
+
+<style>
+    .show-page { font-family: 'Roboto', sans-serif; }
+    .show-page h3, .show-page h5, .show-page h6 { font-family: 'Heebo', sans-serif; }
+
+    /* ── Message principal ── */
+    .msg-root {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-left: 5px solid #0d6efd;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,.06);
+        padding: 1.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+    }
+    .msg-root .msg-label {
+        position: absolute;
+        top: -10px; left: 1.2rem;
+        background: #0d6efd;
+        color: #fff;
+        font-size: .68rem;
+        font-weight: 700;
+        font-family: 'Heebo', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        padding: .15rem .65rem;
+        border-radius: 50px;
+    }
+    .msg-meta {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        flex-wrap: wrap;
+        margin-bottom: .85rem;
+        margin-top: .3rem;
+    }
+    .msg-avatar {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: #0d6efd;
+        color: #fff;
+        font-size: .82rem;
+        font-weight: 700;
+        font-family: 'Heebo', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .msg-avatar.green { background: #198754; }
+    .msg-avatar.purple { background: #6f42c1; }
+    .msg-avatar.orange { background: #fd7e14; }
+
+    .msg-author { font-weight: 700; font-size: .9rem; color: #212529; }
+    .msg-arrow  { color: #adb5bd; font-size: .75rem; }
+    .msg-dest   { font-size: .88rem; color: #495057; }
+    .msg-date   {
+        margin-left: auto;
+        font-size: .78rem;
+        color: #6c757d;
+        display: flex; align-items: center; gap: .3rem;
+    }
+    .msg-subject {
+        font-family: 'Heebo', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #1a1a2e;
+        margin-bottom: .75rem;
+        display: flex; align-items: center; gap: .5rem;
+    }
+    .msg-subject .tag-badge {
+        font-size: .7rem;
+        font-weight: 600;
+        background: rgba(13,110,253,.1);
+        color: #0d6efd;
+        padding: .2rem .6rem;
+        border-radius: 50px;
+        font-family: 'Roboto', sans-serif;
+    }
+    .msg-body {
+        font-size: .9rem;
+        color: #495057;
+        line-height: 1.8;
+        border-top: 1px solid #e9ecef;
+        padding-top: .85rem;
+        white-space: pre-wrap;
+    }
+
+    /* ── Réponses ── */
+    .replies-section { margin-bottom: 1.5rem; }
+    .replies-title {
+        font-family: 'Heebo', sans-serif;
+        font-size: .78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #6c757d;
+        margin-bottom: 1rem;
+        display: flex; align-items: center; gap: .5rem;
+    }
+    .replies-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e9ecef;
+    }
+
+    .reply-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1.1rem 1.25rem;
+        margin-bottom: .75rem;
+        transition: box-shadow .2s;
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    .reply-card::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 4px;
+        background: #e9ecef;
+        border-radius: 4px 0 0 4px;
+    }
+    .reply-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+    .reply-card:hover::before { background: #198754; }
+
+    .reply-meta {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        flex-wrap: wrap;
+        margin-bottom: .55rem;
+    }
+    .reply-avatar {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        background: rgba(25,135,84,.15);
+        color: #198754;
+        font-size: .7rem;
+        font-weight: 700;
+        font-family: 'Heebo', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .reply-author { font-weight: 700; font-size: .85rem; color: #212529; }
+    .reply-dest   { font-size: .82rem; color: #6c757d; }
+    .reply-date   { margin-left: auto; font-size: .75rem; color: #adb5bd; }
+    .reply-body   { font-size: .875rem; color: #495057; line-height: 1.7; white-space: pre-wrap; }
+
+    /* ── Boutons d'action ── */
+    .btn-action {
+        width: 36px; height: 36px;
+        border-radius: 9px;
+        padding: 0;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .85rem;
+        cursor: pointer;
+        transition: background .2s, color .2s, transform .15s;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+    .btn-action:hover { transform: scale(1.08); }
+    .btn-reply   { background: rgba(13,110,253,.12); color: #0d6efd; }
+    .btn-reply:hover  { background: #0d6efd;  color: #fff; }
+    .btn-archive { background: rgba(108,117,125,.12); color: #6c757d; }
+    .btn-archive:hover { background: #6c757d; color: #fff; }
+
+    /* ── Tooltip ── */
+    .btn-wrap { position: relative; display: inline-flex; }
+    .btn-wrap .tip {
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: #212529;
+        color: #fff;
+        font-size: .68rem;
+        font-weight: 600;
+        white-space: nowrap;
+        padding: .2rem .5rem;
+        border-radius: 5px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity .18s;
+        z-index: 10;
+    }
+    .btn-wrap .tip::after {
+        content: '';
+        position: absolute;
+        top: 100%; left: 50%;
+        transform: translateX(-50%);
+        border: 4px solid transparent;
+        border-top-color: #212529;
+    }
+    .btn-wrap:hover .tip { opacity: 1; }
+
+    /* ── Reply CTA card ── */
+    .reply-cta {
+        background: linear-gradient(135deg, #f0f4ff 0%, #f8f9fa 100%);
+        border: 1px dashed #c7d7fd;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    .reply-cta p { margin: 0; font-size: .85rem; color: #6c757d; }
+    .reply-cta strong { color: #212529; }
+    .btn-reply-main {
+        background: linear-gradient(135deg, #0d6efd, #6ea8fe);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: .55rem 1.4rem;
+        font-family: 'Heebo', sans-serif;
+        font-weight: 700;
+        font-size: .88rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        text-decoration: none;
+        transition: opacity .2s, transform .15s;
+        box-shadow: 0 4px 12px rgba(13,110,253,.3);
+        white-space: nowrap;
+    }
+    .btn-reply-main:hover { opacity: .9; transform: translateY(-1px); color: #fff; }
+</style>
+
+<div class="show-page">
+
+{# ── En-tête ── #}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="mb-1 fw-bold">
+            <i class="bi bi-envelope-open-fill text-primary me-2"></i>Conversation
+        </h3>
+        <p class="mb-0 text-muted small">
+            <i class="bi bi-tag me-1"></i>{{ root.objet }}
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-sm btn-outline-secondary mb-0"
+           href="{{ path('message_inbox', {u: activeUser.id}) }}">
+            <i class="bi bi-inbox me-1"></i>Inbox
+        </a>
+        <a class="btn btn-sm btn-outline-secondary mb-0"
+           href="{{ path('message_sent', {u: activeUser.id}) }}">
+            <i class="bi bi-send me-1"></i>Envoyés
+        </a>
+        <a class="btn btn-sm btn-outline-secondary mb-0"
+           href="{{ path('message_archive', {u: activeUser.id}) }}">
+            <i class="bi bi-archive me-1"></i>Archives
+        </a>
+    </div>
+</div>
+
+{# ── Message principal ── #}
+<div class="msg-root">
+    <span class="msg-label"><i class="bi bi-envelope-fill me-1"></i>Message original</span>
+
+    <div class="msg-meta">
+        <span class="msg-avatar">{{ root.expediteur.username|slice(0,1)|upper }}</span>
+        <span class="msg-author">{{ root.expediteur.username }}</span>
+        <i class="bi bi-arrow-right msg-arrow"></i>
+        <span class="msg-dest">{{ root.destinataire.username }}</span>
+
+        <span class="badge rounded-pill bg-{% if root.statut == 'lu' %}success{% else %}primary{% endif %} bg-opacity-10 text-{% if root.statut == 'lu' %}success{% else %}primary{% endif %} ms-1">
+            {% if root.statut == 'lu' %}<i class="bi bi-check-circle-fill me-1"></i>{% else %}<i class="bi bi-envelope-fill me-1"></i>{% endif %}
+            {{ root.statut }}
+        </span>
+
+        <span class="msg-date">
+            <i class="bi bi-clock"></i>
+            {{ root.dateEnvoi ? root.dateEnvoi|date('d/m/Y H:i') : '' }}
+        </span>
+
+        {# Actions rapides #}
+        <div class="d-flex gap-2 ms-2">
+            <div class="btn-wrap">
+                <a href="{{ path('message_reply', {id: message.id, u: activeUser.id}) }}"
+                   class="btn-action btn-reply">
+                    <i class="bi bi-reply-fill"></i>
+                </a>
+                <span class="tip">Répondre</span>
+            </div>
+            <div class="btn-wrap">
+                <form method="post"
+                      action="{{ path('message_toggle_archive', {id: message.id, u: activeUser.id, from: 'inbox'}) }}">
+                    <button type="submit" class="btn-action btn-archive">
+                        <i class="bi bi-archive"></i>
+                    </button>
+                </form>
+                <span class="tip">Archiver</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="msg-subject">
+        <span class="tag-badge">Objet</span>
+        {{ root.objet }}
+    </div>
+
+    <div class="msg-body">{{ root.contenu|nl2br }}</div>
+</div>
+
+{# ── Réponses ── #}
+{% if thread|length > 1 %}
+<div class="replies-section">
+    <div class="replies-title">
+        <i class="bi bi-reply-all-fill text-success"></i>
+        {{ thread|length - 1 }} réponse{% if (thread|length - 1) > 1 %}s{% endif %}
+    </div>
+
+    {% for m in thread %}
+        {% if m.id != root.id %}
+        <div class="reply-card">
+            <div class="reply-meta">
+                <span class="reply-avatar">{{ m.expediteur.username|slice(0,1)|upper }}</span>
+                <span class="reply-author">{{ m.expediteur.username }}</span>
+                <i class="bi bi-arrow-right" style="color:#adb5bd;font-size:.7rem;"></i>
+                <span class="reply-dest">{{ m.destinataire.username }}</span>
+                <span class="reply-date">
+                    <i class="bi bi-clock me-1"></i>
+                    {{ m.dateEnvoi ? m.dateEnvoi|date('d/m/Y H:i') : '' }}
+                </span>
+            </div>
+            <div class="reply-body">{{ m.contenu|nl2br }}</div>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ── CTA Répondre ── #}
+<div class="reply-cta">
+    <p>
+        <i class="bi bi-reply-fill text-primary me-2"></i>
+        Répondre à <strong>{{ root.expediteur.username }}</strong>
+    </p>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+        <form method="post"
+              action="{{ path('message_toggle_archive', {id: message.id, u: activeUser.id, from: 'inbox'}) }}">
+            <button type="submit" class="btn btn-sm btn-outline-secondary mb-0">
+                <i class="bi bi-archive me-1"></i>Archiver / Désarchiver
+            </button>
+        </form>
+        <a href="{{ path('message_reply', {id: message.id, u: activeUser.id}) }}"
+           class="btn-reply-main">
+            <i class="bi bi-reply-fill"></i>Répondre
+        </a>
+    </div>
+</div>
+
+</div>{# /show-page #}
+

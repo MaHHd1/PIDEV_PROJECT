@@ -1,0 +1,338 @@
+<style>
+    .forums-page { font-family: 'Roboto', sans-serif; }
+    .forums-page h3, .forums-page h5, .forums-page h6 { font-family: 'Heebo', sans-serif; }
+
+    /* ── Search bar ── */
+    .forums-page .search-wrap .form-control {
+        border: 1px solid #dee2e6;
+        border-radius: 8px 0 0 8px;
+        font-size: .88rem;
+        padding: .6rem .9rem;
+        background: #fff;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .forums-page .search-wrap .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13,110,253,.1);
+        outline: none;
+        z-index: 1;
+    }
+    .forums-page .search-wrap .btn-search {
+        border-radius: 0 8px 8px 0;
+        border: 1px solid #dee2e6;
+        border-left: none;
+        background: #f8f9fa;
+        color: #495057;
+        font-size: .88rem;
+        padding: .6rem 1.2rem;
+        transition: background .2s, color .2s;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .forums-page .search-wrap .btn-search:hover {
+        background: #0d6efd;
+        color: #fff;
+        border-color: #0d6efd;
+    }
+
+    /* ── Forum card ── */
+    .forum-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.05);
+        padding: 1.25rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: box-shadow .2s, transform .2s;
+        position: relative;
+        overflow: hidden;
+    }
+    .forum-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #0d6efd, #6ea8fe);
+        opacity: 0;
+        transition: opacity .2s;
+    }
+    .forum-card:hover {
+        box-shadow: 0 8px 28px rgba(0,0,0,.1);
+        transform: translateY(-2px);
+    }
+    .forum-card:hover::before { opacity: 1; }
+
+    /* ── Card top row ── */
+    .forum-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: .5rem;
+        margin-bottom: .6rem;
+    }
+    .forum-title {
+        font-family: 'Heebo', sans-serif;
+        font-weight: 700;
+        font-size: .98rem;
+        color: #212529;
+        margin: 0;
+        line-height: 1.35;
+        flex: 1;
+    }
+    .forum-title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color .15s;
+    }
+    .forum-title a:hover { color: #0d6efd; }
+
+    .badge-type {
+        font-size: .68rem;
+        font-weight: 700;
+        padding: .25rem .6rem;
+        border-radius: 50px;
+        background: rgba(13,110,253,.1);
+        color: #0d6efd;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .badge-modified {
+        font-size: .68rem;
+        font-weight: 700;
+        padding: .25rem .6rem;
+        border-radius: 50px;
+        background: rgba(255,193,7,.15);
+        color: #856404;
+        white-space: nowrap;
+    }
+
+    /* ── Description ── */
+    .forum-desc {
+        font-size: .85rem;
+        color: #6c757d;
+        line-height: 1.65;
+        flex: 1;
+        margin-bottom: .85rem;
+    }
+
+    /* ── Stats row ── */
+    .forum-stats {
+        display: flex;
+        align-items: center;
+        gap: .85rem;
+        flex-wrap: wrap;
+        font-size: .78rem;
+        color: #adb5bd;
+        margin-bottom: .85rem;
+        padding-bottom: .85rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: .3rem;
+    }
+    .stat-item i { font-size: .8rem; }
+    .stat-item.views  { color: #6c757d; }
+    .stat-item.likes  { color: #198754; }
+    .stat-item.dislike{ color: #dc3545; }
+    .stat-item.report { color: #fd7e14; }
+
+    /* ── Card footer ── */
+    .forum-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .5rem;
+        flex-wrap: wrap;
+        margin-top: auto;
+    }
+    .forum-date {
+        font-size: .75rem;
+        color: #adb5bd;
+        display: flex;
+        align-items: center;
+        gap: .3rem;
+    }
+    .btn-open {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .4rem 1rem;
+        border-radius: 8px;
+        background: rgba(13,110,253,.1);
+        color: #0d6efd;
+        font-size: .82rem;
+        font-weight: 600;
+        font-family: 'Heebo', sans-serif;
+        text-decoration: none;
+        border: none;
+        transition: background .2s, color .2s;
+        white-space: nowrap;
+    }
+    .btn-open:hover { background: #0d6efd; color: #fff; }
+
+    /* ── Empty state ── */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #adb5bd;
+    }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: .4; display: block; }
+    .empty-state p { font-size: .9rem; }
+
+    /* ── Pagination ── */
+    .forums-page .pagination .page-link {
+        color: #0d6efd;
+        border-color: #dee2e6;
+        border-radius: 8px !important;
+        margin: 0 2px;
+        font-size: .82rem;
+        padding: .35rem .65rem;
+    }
+    .forums-page .pagination .page-item.active .page-link {
+        background: #0d6efd;
+        border-color: #0d6efd;
+        color: #fff;
+        font-weight: 700;
+    }
+    .forums-page .pagination .page-link:hover {
+        background: rgba(13,110,253,.08);
+        color: #0d6efd;
+    }
+</style>
+
+<div class="forums-page">
+
+{# ── En-tête ── #}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="mb-1 fw-bold">
+            <i class="bi bi-chat-dots-fill text-primary me-2"></i>Forums
+        </h3>
+        <p class="mb-0 text-muted small">
+            {{ total }} forum{% if total > 1 %}s{% endif %} &bull; page {{ page }}/{{ pages }}
+        </p>
+    </div>
+    <a class="btn btn-sm btn-primary mb-0" href="{{ path('forum_new') }}">
+        <i class="bi bi-plus-lg me-1"></i>Nouveau forum
+    </a>
+</div>
+
+{# ── Barre de recherche ── #}
+<form method="get" action="{{ path('forum_list') }}" class="mb-4">
+    <div class="input-group search-wrap" style="max-width: 560px;">
+        <input class="form-control"
+               name="q"
+               value="{{ q }}"
+               placeholder="Rechercher (titre ou description)…">
+        <button type="submit" class="btn btn-search">
+            <i class="bi bi-search me-1"></i>Rechercher
+        </button>
+    </div>
+</form>
+
+{# ── Grille de forums ── #}
+<div class="row g-3">
+    {% for f in forums %}
+        <div class="col-md-6">
+            <div class="forum-card">
+
+                {# Top : titre + badges #}
+                <div class="forum-card-top">
+                    <h5 class="forum-title">
+                        <a href="{{ path('forum_show', {id: f.id}) }}">
+                            {{ f.titre }}
+                        </a>
+                    </h5>
+                    <div class="d-flex gap-1 flex-shrink-0">
+                        {% if f.estModifie %}
+                            <span class="badge-modified">
+                                <i class="bi bi-pencil-fill me-1"></i>modifié
+                            </span>
+                        {% endif %}
+                        <span class="badge-type">{{ f.type }}</span>
+                    </div>
+                </div>
+
+                {# Description #}
+                <p class="forum-desc">
+                    {{ f.description|slice(0, 140) }}{% if f.description|length > 140 %}…{% endif %}
+                </p>
+
+                {# Stats #}
+                <div class="forum-stats">
+                    <span class="stat-item views">
+                        <i class="bi bi-eye"></i>{{ f.nombreVues }} vues
+                    </span>
+                    <span class="stat-item likes">
+                        <i class="bi bi-hand-thumbs-up-fill"></i>{{ f.likes ?? 0 }}
+                    </span>
+                    <span class="stat-item dislike">
+                        <i class="bi bi-hand-thumbs-down-fill"></i>{{ f.dislikes ?? 0 }}
+                    </span>
+                    <span class="stat-item report">
+                        <i class="bi bi-flag-fill"></i>{{ f.signalements ?? 0 }}
+                    </span>
+                    {% if f.estModifie and f.dateModification %}
+                        <span class="stat-item ms-auto" style="color:#adb5bd;">
+                            <i class="bi bi-clock-history"></i>
+                            Modifié le {{ f.dateModification|date('d/m/Y H:i') }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                {# Footer : date + bouton #}
+                <div class="forum-card-footer">
+                    <span class="forum-date">
+                        {% if f.derniereActivite %}
+                            <i class="bi bi-clock"></i>
+                            {{ f.derniereActivite|date('d/m/Y H:i') }}
+                        {% endif %}
+                    </span>
+                    <a class="btn-open" href="{{ path('forum_show', {id: f.id}) }}">
+                        <i class="bi bi-box-arrow-in-right"></i>Ouvrir
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    {% else %}
+        <div class="col-12">
+            <div class="empty-state">
+                <i class="bi bi-chat-dots"></i>
+                <p>Aucun forum trouvé.</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{# ── Pagination ── #}
+{% if pages > 1 %}
+<div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4">
+    <p class="mb-0 text-muted small">Page <strong>{{ page }}</strong> sur <strong>{{ pages }}</strong></p>
+    <nav>
+        <ul class="pagination pagination-sm mb-0 d-inline-flex">
+            <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                <a class="page-link" href="{{ path('forum_list', {page: page - 1, q: q}) }}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            {% for p in 1..pages %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="{{ path('forum_list', {page: p, q: q}) }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+            <li class="page-item {% if page == pages %}disabled{% endif %}">
+                <a class="page-link" href="{{ path('forum_list', {page: page + 1, q: q}) }}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+{% endif %}
+
+</div>{# /forums-page #}
