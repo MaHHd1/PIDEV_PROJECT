@@ -1,0 +1,352 @@
+{% extends 'admin/admin_base.html.twig' %}
+
+    
+{% block admin_content %}
+<style>
+    .admin-page { font-family: 'Roboto', sans-serif; color: #1e1e2d; }
+    .admin-page h3 { font-family: 'Heebo', sans-serif; }
+
+    .admin-header {
+        background: linear-gradient(135deg, #1e1e2d, #3d3d5c);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: .75rem;
+    }
+    .admin-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #fff; }
+    .admin-header p  { margin: 0; font-size: .8rem; opacity: .7; }
+    .badge-admin {
+        background: rgba(255,255,255,.15); color: #fff;
+        font-size: .7rem; font-weight: 700;
+        padding: .25rem .65rem; border-radius: 50px; letter-spacing: .04em;
+    }
+
+    /* ── Search ── */
+    .admin-search .form-control {
+        border-radius: 8px 0 0 8px; border: 1px solid #dee2e6;
+        font-size: .88rem; padding: .55rem .9rem;
+    }
+    .admin-search .form-control:focus {
+        border-color: #1e1e2d; box-shadow: 0 0 0 3px rgba(30,30,45,.1); outline: none;
+    }
+    .admin-search .btn-search {
+        border-radius: 0 8px 8px 0; border: 1px solid #dee2e6; border-left: none;
+        background: #f8f9fa; font-size: .88rem; padding: .55rem 1.1rem; transition: background .2s;
+    }
+    .admin-search .btn-search:hover { background: #1e1e2d; color: #fff; border-color: #1e1e2d; }
+
+    /* ── Table ── */
+    .admin-table {
+        background: #fff; border: 1px solid #e4e6ea;
+        border-radius: 12px; overflow: visible;
+        box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+    .admin-table table { margin: 0; width: 100%; border-collapse: separate; border-spacing: 0; }
+    .admin-table thead tr { background: #f8f9fa; border-bottom: 2px solid #e4e6ea; }
+    .admin-table thead th:first-child { border-radius: 12px 0 0 0; }
+    .admin-table thead th:last-child  { border-radius: 0 12px 0 0; }
+    .admin-table tbody tr:last-child td:first-child { border-radius: 0 0 0 12px; }
+    .admin-table tbody tr:last-child td:last-child  { border-radius: 0 0 12px 0; }
+    .admin-table thead th {
+        font-family: 'Heebo', sans-serif; font-size: .75rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .05em; color: #6c757d;
+        padding: .85rem 1rem; white-space: nowrap;
+    }
+    .admin-table tbody tr { border-bottom: 1px solid #f0f0f5; transition: background .15s; }
+    .admin-table tbody tr:last-child { border-bottom: none; }
+    .admin-table tbody tr:hover { background: #fafafa; }
+    .admin-table td { padding: .85rem 1rem; font-size: .85rem; color: #495057; vertical-align: middle; }
+
+    .msg-objet-cell { font-weight: 600; color: #1e1e2d; max-width: 220px; }
+    .msg-objet-cell small {
+        display: block; font-weight: 400; font-size: .75rem; color: #adb5bd;
+        margin-top: .15rem; white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis; max-width: 200px;
+    }
+
+    .badge-statut-envoye  { background: rgba(13,110,253,.1);  color: #0d6efd;  font-size: .68rem; font-weight: 700; padding: .22rem .55rem; border-radius: 50px; }
+    .badge-statut-lu      { background: rgba(25,135,84,.1);   color: #198754;  font-size: .68rem; font-weight: 700; padding: .22rem .55rem; border-radius: 50px; }
+    .badge-statut-archive { background: rgba(108,117,125,.1); color: #6c757d;  font-size: .68rem; font-weight: 700; padding: .22rem .55rem; border-radius: 50px; }
+
+    .btn-admin-delete {
+        display: inline-flex; align-items: center; gap: .3rem;
+        padding: .3rem .7rem; border-radius: 6px;
+        border: 1px solid rgba(220,53,69,.3); background: rgba(220,53,69,.07); color: #dc3545;
+        font-size: .75rem; font-weight: 600; font-family: 'Heebo', sans-serif;
+        cursor: pointer; transition: background .15s, color .15s;
+    }
+    .btn-admin-delete:hover { background: #dc3545; color: #fff; border-color: #dc3545; }
+
+    .btn-admin-view {
+        display: inline-flex; align-items: center; gap: .3rem;
+        padding: .3rem .7rem; border-radius: 6px;
+        border: 1px solid #e4e6ea; background: #fff; color: #495057;
+        font-size: .75rem; font-weight: 600; font-family: 'Heebo', sans-serif;
+        cursor: pointer; transition: background .15s;
+    }
+    .btn-admin-view:hover { background: #f0f0f5; color: #1e1e2d; }
+
+    /* ── Modal ── */
+    .modal-admin .modal-content {
+        border: none; border-radius: 14px; overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,.15);
+    }
+    .modal-admin .modal-header {
+        background: linear-gradient(135deg, #1e1e2d, #3d3d5c);
+        color: #fff; border: none; padding: 1.1rem 1.5rem;
+    }
+    .modal-admin .modal-title { font-family: 'Heebo', sans-serif; font-weight: 700; font-size: 1rem; }
+    .modal-admin .btn-close { filter: invert(1); opacity: .7; }
+    .modal-admin .modal-body { padding: 1.5rem; }
+    .modal-admin .modal-footer { border-top: 1px solid #e4e6ea; padding: .85rem 1.5rem; background: #fafafa; }
+
+    .modal-field-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #adb5bd; margin-bottom: .25rem; }
+    .modal-field-value { font-size: .88rem; color: #1e1e2d; line-height: 1.65; margin-bottom: 1rem; }
+    .modal-field-value.contenu {
+        background: #f8f9fa; border-radius: 8px;
+        padding: 1rem 1.1rem; color: #495057; line-height: 1.8;
+        min-height: 80px;
+    }
+
+    /* ── Empty ── */
+    .empty-admin { text-align: center; padding: 3rem 1rem; color: #adb5bd; }
+    .empty-admin i { font-size: 2.5rem; opacity: .3; display: block; margin-bottom: .75rem; }
+
+    /* ── Pagination ── */
+    .admin-page .pagination .page-link { color: #1e1e2d; border-color: #dee2e6; border-radius: 8px !important; margin: 0 2px; font-size: .82rem; padding: .35rem .65rem; }
+    .admin-page .pagination .page-item.active .page-link { background: #1e1e2d; border-color: #1e1e2d; color: #fff; font-weight: 700; }
+    .admin-page .pagination .page-link:hover { background: rgba(30,30,45,.08); }
+</style>
+
+<div class="admin-page">
+
+    {# ── Header ── #}
+    <div class="admin-header">
+        <div>
+            <h3><i class="bi bi-shield-fill me-2"></i>Administration — Messages</h3>
+            <p>{{ total }} message{% if total > 1 %}s{% endif %} au total &bull; page {{ page }}/{{ pages }}</p>
+        </div>
+        <span class="badge-admin"><i class="bi bi-person-fill-gear me-1"></i>Admin</span>
+    </div>
+
+    {# ── Search ── #}
+    <form method="get" action="{{ path('admin_message_list') }}" class="mb-4">
+        <div class="input-group admin-search" style="max-width: 500px;">
+            <input class="form-control" name="q" value="{{ q }}" placeholder="Rechercher un message…">
+            <button type="submit" class="btn btn-search">
+                <i class="bi bi-search me-1"></i>Rechercher
+            </button>
+        </div>
+    </form>
+
+    {# ── Table ── #}
+    <div class="admin-table mb-4">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Objet</th>
+                    <th>Expéditeur</th>
+                    <th>Destinataire</th>
+                    <th>Statut</th>
+                    <th>Date envoi</th>
+                    <th>Lu le</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in messages %}
+                    <tr>
+                        <td style="color:#adb5bd; font-size:.78rem;">{{ m.id }}</td>
+
+                        <td class="msg-objet-cell">
+                            {{ m.objet|slice(0,45) }}{% if m.objet|length > 45 %}…{% endif %}
+                            {% if m.parent %}
+                                <small><i class="bi bi-reply-fill me-1"></i>Réponse au message #{{ m.parent.id }}</small>
+                            {% endif %}
+                        </td>
+
+                        <td><span style="font-size:.82rem; font-weight:600;">{{ m.expediteur ? m.expediteur.username : '—' }}</span></td>
+
+                        <td><span style="font-size:.82rem; font-weight:600;">{{ m.destinataire ? m.destinataire.username : '—' }}</span></td>
+
+                        <td>
+                            {% if m.statut == 'envoye' %}
+                                <span class="badge-statut-envoye"><i class="bi bi-send-fill me-1"></i>envoyé</span>
+                            {% elseif m.statut == 'lu' %}
+                                <span class="badge-statut-lu"><i class="bi bi-check2-all me-1"></i>lu</span>
+                            {% else %}
+                                <span class="badge-statut-archive"><i class="bi bi-archive-fill me-1"></i>{{ m.statut }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td style="font-size:.78rem; color:#adb5bd; white-space:nowrap;">
+                            {% if m.dateEnvoi %}
+                                <i class="bi bi-clock me-1"></i>{{ m.dateEnvoi|date('d/m/Y H:i') }}
+                            {% else %}—{% endif %}
+                        </td>
+
+                        <td style="font-size:.78rem; color:#adb5bd; white-space:nowrap;">
+                            {% if m.dateLecture %}
+                                <i class="bi bi-eye me-1"></i>{{ m.dateLecture|date('d/m/Y H:i') }}
+                            {% else %}
+                                <span style="color:#dee2e6;">non lu</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="d-flex gap-2">
+                                <button class="btn-admin-view"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalMsg{{ m.id }}">
+                                    <i class="bi bi-eye"></i>Voir
+                                </button>
+                                <form method="post"
+                                      action="{{ path('admin_message_delete', {id: m.id}) }}"
+                                      onsubmit="return confirm('Supprimer ce message définitivement ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('admin_delete_msg' ~ m.id) }}">
+                                    <button type="submit" class="btn-admin-delete">
+                                        <i class="bi bi-trash"></i>Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {# ══ MODAL détail message ══ #}
+                    <div class="modal fade modal-admin" id="modalMsg{{ m.id }}"
+                         tabindex="-1" aria-labelledby="modalMsgLabel{{ m.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalMsgLabel{{ m.id }}">
+                                        <i class="bi bi-envelope-fill me-2"></i>
+                                        {{ m.objet|slice(0,60) }}{% if m.objet|length > 60 %}…{% endif %}
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+
+                                <div class="modal-body">
+
+                                    {# Expéditeur / Destinataire / Statut #}
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-sm-4">
+                                            <div class="modal-field-label">Expéditeur</div>
+                                            <div class="modal-field-value">
+                                                <i class="bi bi-person-fill me-1 text-muted"></i>
+                                                {{ m.expediteur ? m.expediteur.username : '—' }}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="modal-field-label">Destinataire</div>
+                                            <div class="modal-field-value">
+                                                <i class="bi bi-person me-1 text-muted"></i>
+                                                {{ m.destinataire ? m.destinataire.username : '—' }}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="modal-field-label">Statut</div>
+                                            <div class="modal-field-value">
+                                                {% if m.statut == 'envoye' %}
+                                                    <span class="badge-statut-envoye"><i class="bi bi-send-fill me-1"></i>envoyé</span>
+                                                {% elseif m.statut == 'lu' %}
+                                                    <span class="badge-statut-lu"><i class="bi bi-check2-all me-1"></i>lu</span>
+                                                {% else %}
+                                                    <span class="badge-statut-archive"><i class="bi bi-archive-fill me-1"></i>{{ m.statut }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {# Dates #}
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-sm-6">
+                                            <div class="modal-field-label">Date d'envoi</div>
+                                            <div class="modal-field-value">
+                                                <i class="bi bi-clock me-1 text-muted"></i>
+                                                {{ m.dateEnvoi ? m.dateEnvoi|date('d/m/Y H:i') : '—' }}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="modal-field-label">Lu le</div>
+                                            <div class="modal-field-value">
+                                                <i class="bi bi-eye me-1 text-muted"></i>
+                                                {{ m.dateLecture ? m.dateLecture|date('d/m/Y H:i') : 'Non lu' }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {# Réponse à #}
+                                    {% if m.parent %}
+                                        <div class="modal-field-label">Réponse au message</div>
+                                        <div class="modal-field-value">
+                                            <i class="bi bi-reply-fill me-1 text-muted"></i>
+                                            #{{ m.parent.id }} — {{ m.parent.objet|slice(0,60) }}
+                                        </div>
+                                    {% endif %}
+
+                                    {# Contenu complet #}
+                                    <div class="modal-field-label">Contenu du message</div>
+                                    <div class="modal-field-value contenu">{{ m.contenu|nl2br }}</div>
+
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                                        Fermer
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    {# ══ /MODAL ══ #}
+
+                {% else %}
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-admin">
+                                <i class="bi bi-envelope"></i>
+                                <p>Aucun message trouvé.</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ── Pagination ── #}
+    {% if pages > 1 %}
+    <div class="d-sm-flex justify-content-sm-between align-items-sm-center">
+        <p class="mb-0 text-muted small">Page <strong>{{ page }}</strong> sur <strong>{{ pages }}</strong></p>
+        <nav>
+            <ul class="pagination pagination-sm mb-0 d-inline-flex">
+                <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{{ path('admin_message_list', {page: page - 1, q: q}) }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for p in 1..pages %}
+                    <li class="page-item {% if p == page %}active{% endif %}">
+                        <a class="page-link" href="{{ path('admin_message_list', {page: p, q: q}) }}">{{ p }}</a>
+                    </li>
+                {% endfor %}
+                <li class="page-item {% if page == pages %}disabled{% endif %}">
+                    <a class="page-link" href="{{ path('admin_message_list', {page: page + 1, q: q}) }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+
+</div>{# /admin-page #}
+{% endblock %}
