@@ -2,6 +2,18 @@
 
 {% block title %}Login - NovaLearn{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        .recaptcha-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+{% endblock %}
+
 {% block auth_stylesheets %}
     {{ parent() }}
     <!-- Authentication specific CSS -->
@@ -57,7 +69,7 @@
                             <!-- Display messages -->
                             {% if error %}
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    {{ error|trans({}, 'security') }}
+                                    {{ error }}
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             {% endif %}
@@ -84,7 +96,6 @@
                             {% endfor %}
 
                             <!-- Form START -->
-                            <!-- Added novalidate to disable HTML5 validation -->
                             <form method="post" action="{{ path('app_login') }}" novalidate>
                                 {{ form_start(form) }}
 
@@ -113,6 +124,11 @@
                                         Your password must be 8 characters at least
                                     </div>
                                     {{ form_errors(form.password) }}
+                                </div>
+
+                                <!-- reCAPTCHA v2 Checkbox -->
+                                <div class="recaptcha-container">
+                                    <div class="g-recaptcha" data-sitekey="{{ google_recaptcha_site_key }}"></div>
                                 </div>
 
                                 <!-- Check box -->
@@ -157,7 +173,7 @@
                                 </div>
                             </div>
 
-                            <!-- Sign up link - MODIFIÉ POUR ÉVITER L'ERREUR -->
+                            <!-- Sign up link -->
                             <div class="mt-4 text-center">
                                 <span>Don't have an account? <a href="#" onclick="alert('Pour créer un compte, contactez l\\'administration.'); return false;">Contact admin</a></span>
                             </div>

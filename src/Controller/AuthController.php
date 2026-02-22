@@ -12,14 +12,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
+use ReCaptcha\ReCaptcha;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class AuthController extends AbstractController
 {
     private $requestStack;
+    private $params;
 
-    public function __construct(RequestStack $requestStack)
+    public function __construct(RequestStack $requestStack, ParameterBagInterface $params)
     {
         $this->requestStack = $requestStack;
+        $this->params = $params;
     }
 
     #[Route('/login', name: 'app_login')]
@@ -44,6 +48,40 @@ class AuthController extends AbstractController
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $recaptchaSecret = (string) $this->params->get('google_recaptcha_secret');
+            $reCaptcha = new ReCaptcha($recaptchaSecret);
+
+            // Verify reCAPTCHA v2
+            $recaptchaResponse = $request->request->get('g-recaptcha-response');
+
+            if (empty($recaptchaResponse)) {
+                $error = 'Veuillez confirmer que vous n\'êtes pas un robot.';
+
+                return $this->render('auth/login.html.twig', [
+                    'form' => $form->createView(),
+                    'error' => $error,
+                    'google_recaptcha_site_key' => $this->params->get('google_recaptcha_site_key')
+                ]);
+            }
+
+            $resp = $reCaptcha->verify($recaptchaResponse, $request->getClientIp());
+
+            if (!$resp->isSuccess()) {
+                $error = 'La validation reCAPTCHA a échoué. Veuillez réessayer.';
+                $errorCodes = $resp->getErrorCodes();
+                if (!empty($errorCodes)) {
+                    // Log the error codes for debugging
+                    error_log('reCAPTCHA error: ' . implode(', ', $errorCodes));
+                }
+
+                return $this->render('auth/login.html.twig', [
+                    'form' => $form->createView(),
+                    'error' => $error,
+                    'google_recaptcha_site_key' => $this->params->get('google_recaptcha_site_key')
+                ]);
+            }
+
+            // Continue with login
             $data = $form->getData();
             $email = $data['email'];
             $password = $data['password'];
@@ -54,17 +92,16 @@ class AuthController extends AbstractController
                 $this->addFlash('success', 'Connexion réussie ! Bienvenue ' . $user->getPrenom() . '!');
                 return $this->redirectToRoute('app_home');
             } else {
-                // Set error for template
                 $error = 'Email ou mot de passe incorrect.';
             }
         } elseif ($form->isSubmitted()) {
-            // Form has validation errors
             $error = 'Veuillez vérifier les informations saisies.';
         }
 
         return $this->render('auth/login.html.twig', [
             'form' => $form->createView(),
-            'error' => $error
+            'error' => $error,
+            'google_recaptcha_site_key' => $this->params->get('google_recaptcha_site_key')
         ]);
     }
 
@@ -201,36 +238,11 @@ class AuthController extends AbstractController
         ]);
     }
 
-    // Temporary route for signup - redirects to login with message
+    // Route for signup - redirects to login with message
     #[Route('/signup', name: 'app_signup')]
     public function signup(): Response
     {
         $this->addFlash('info', 'Pour créer un compte, contactez l\'administration.');
         return $this->redirectToRoute('app_login');
-    }
-
-    // DEBUG ROUTE - REMOVE THIS IN PRODUCTION
-    #[Route('/test-reset-token', name: 'app_test_reset_token')]
-    public function testResetToken(AuthChecker $authChecker): Response
-    {
-        // Test with a known email
-        $email = 'sophie.martin@email.com';
-
-        $result = $authChecker->createPasswordReset($email);
-
-        if ($result) {
-            return new Response(
-                '<h3>Token créé avec succès !</h3>' .
-                '<p><strong>Email:</strong> ' . $email . '</p>' .
-                '<p><strong>Token:</strong> ' . $result['token'] . '</p>' .
-                '<p><strong>Expire le:</strong> ' . $result['expires_at']->format('Y-m-d H:i:s') . '</p>' .
-                '<p><strong>ID Utilisateur:</strong> ' . $result['user']->getId() . '</p>' .
-                '<p><strong>Nom:</strong> ' . $result['user']->getNomComplet() . '</p>' .
-                '<hr>' .
-                '<p><a href="/reset-password/' . $result['token'] . '" class="btn btn-primary">Test reset link</a></p>'
-            );
-        }
-
-        return new Response('<div class="alert alert-danger">Utilisateur non trouvé ou erreur de création de token</div>');
     }
 }

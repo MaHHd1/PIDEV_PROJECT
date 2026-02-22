@@ -159,7 +159,12 @@ class AuthChecker
         $this->entityManager->flush();
 
         // SEND EMAIL
-        $this->sendResetEmail($user, $token, $expiresAt);
+        try {
+            $this->sendResetEmail($user, $token, $expiresAt);
+        } catch (\Exception $e) {
+            // Log error but don't throw - user should still get success message for security
+            error_log('Failed to send reset email: ' . $e->getMessage());
+        }
 
         return [
             'user' => $user,
@@ -170,22 +175,40 @@ class AuthChecker
 
     private function sendResetEmail(Utilisateur $user, string $token, \DateTime $expiresAt): void
     {
-        // Use your application URL - you might want to get this from configuration
+        // Use your application URL from .env
         $appUrl = $_ENV['APP_URL'] ?? 'http://localhost:8000';
         $resetLink = $appUrl . '/reset-password/' . $token;
 
-        $email = (new Email())
-            ->from('no-reply@yourdomain.com')
-            ->to($user->getEmail())
-            ->subject('Réinitialisation de votre mot de passe')
-            ->html($this->getEmailTemplate($user, $resetLink, $expiresAt));
+        // Get from address with fallback
+        $fromEmail = $_ENV['MAILER_FROM'] ?? 'noreply@novalearn.com';
 
-        try {
-            $this->mailer->send($email);
-        } catch (\Exception $e) {
-            // Log the error but don't throw it - user should still get feedback
-            error_log('Failed to send reset email: ' . $e->getMessage());
+        // Validate email format
+        if (!filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+            $fromEmail = 'noreply@novalearn.com';
         }
+
+        $email = (new Email())
+            ->from($fromEmail)
+            ->to($user->getEmail())
+            ->subject('Réinitialisation de votre mot de passe - NovaLearn')
+            ->html($this->getEmailTemplate($user, $resetLink, $expiresAt))
+            ->text($this->getTextEmailTemplate($user, $resetLink, $expiresAt));
+
+        $this->mailer->send($email);
+
+        // Log success for debugging
+        error_log('Password reset email sent successfully to: ' . $user->getEmail());
+    }
+
+    private function getTextEmailTemplate(Utilisateur $user, string $resetLink, \DateTime $expiresAt): string
+    {
+        return "Bonjour " . $user->getNomComplet() . ",\n\n" .
+            "Vous avez demandé à réinitialiser votre mot de passe.\n\n" .
+            "Cliquez sur le lien ci-dessous pour procéder :\n" .
+            $resetLink . "\n\n" .
+            "Ce lien expirera le : " . $expiresAt->format('d/m/Y à H:i') . "\n\n" .
+            "Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.\n\n" .
+            "Ceci est un email automatique, merci de ne pas y répondre.";
     }
 
     private function getEmailTemplate(Utilisateur $user, string $resetLink, \DateTime $expiresAt): string
@@ -194,32 +217,74 @@ class AuthChecker
             <!DOCTYPE html>
             <html>
             <head>
+                <meta charset="UTF-8">
                 <style>
-                    body { font-family: Arial, sans-serif; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        line-height: 1.6;
+                        color: #333;
+                    }
+                    .container { 
+                        max-width: 600px; 
+                        margin: 0 auto; 
+                        padding: 20px;
+                        background: #f9f9f9;
+                        border-radius: 10px;
+                    }
+                    .header {
+                        background: #007bff;
+                        color: white;
+                        padding: 20px;
+                        text-align: center;
+                        border-radius: 10px 10px 0 0;
+                    }
+                    .content {
+                        background: white;
+                        padding: 30px;
+                        border-radius: 0 0 10px 10px;
+                    }
                     .button { 
                         background-color: #007bff; 
                         color: white; 
-                        padding: 10px 20px; 
+                        padding: 12px 30px; 
                         text-decoration: none; 
                         border-radius: 5px; 
-                        display: inline-block; 
+                        display: inline-block;
+                        margin: 20px 0;
+                        font-weight: bold;
+                    }
+                    .button:hover {
+                        background-color: #0056b3;
+                    }
+                    .footer {
+                        text-align: center;
+                        margin-top: 30px;
+                        font-size: 12px;
+                        color: #666;
                     }
                 </style>
             </head>
             <body>
                 <div class="container">
-                    <h2>Réinitialisation de mot de passe</h2>
-                    <p>Bonjour ' . htmlspecialchars($user->getNomComplet()) . ',</p>
-                    <p>Vous avez demandé à réinitialiser votre mot de passe.</p>
-                    <p>Cliquez sur le lien ci-dessous pour procéder :</p>
-                    <p>
-                        <a href="' . $resetLink . '" class="button">Réinitialiser mon mot de passe</a>
-                    </p>
-                    <p>Ce lien expirera le : ' . $expiresAt->format('d/m/Y à H:i') . '</p>
-                    <p>Si vous n\'avez pas demandé cette réinitialisation, veuillez ignorer cet email.</p>
-                    <hr>
-                    <p><small>Ceci est un email automatique, merci de ne pas y répondre.</small></p>
+                    <div class="header">
+                        <h2>🔐 NovaLearn</h2>
+                    </div>
+                    <div class="content">
+                        <h3>Réinitialisation de mot de passe</h3>
+                        <p>Bonjour <strong>' . htmlspecialchars($user->getPrenom()) . ' ' . htmlspecialchars($user->getNom()) . '</strong>,</p>
+                        <p>Vous avez demandé à réinitialiser votre mot de passe.</p>
+                        <p>Cliquez sur le bouton ci-dessous pour procéder :</p>
+                        <p style="text-align: center;">
+                            <a href="' . $resetLink . '" class="button">Réinitialiser mon mot de passe</a>
+                        </p>
+                        <p><strong>⚠️ Ce lien expirera le : ' . $expiresAt->format('d/m/Y à H:i') . '</strong></p>
+                        <p>Si vous n\'avez pas demandé cette réinitialisation, veuillez ignorer cet email.</p>
+                        <hr>
+                        <p><small>Ceci est un email automatique, merci de ne pas y répondre.</small></p>
+                    </div>
+                    <div class="footer">
+                        <p>© ' . date('Y') . ' NovaLearn. Tous droits réservés.</p>
+                    </div>
                 </div>
             </body>
             </html>
