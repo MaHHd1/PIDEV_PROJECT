@@ -1,0 +1,148 @@
+{% extends 'etudiant/student_base.html.twig' %}
+
+{% block title %}{{ quiz.titre }} - Novalearn{% endblock %}
+
+{% block student_content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('quiz_index') }}">Mes Quiz</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ quiz.titre }}</li>
+    </ol>
+</nav>
+
+<!-- Quiz details START -->
+<div class="card border">
+    <div class="card-header border-bottom">
+        <h3 class="card-title mb-0">{{ quiz.titre }}</h3>
+    </div>
+    
+    <div class="card-body">
+        <!-- Description -->
+        <p class="mb-3">{{ quiz.description }}</p>
+        
+        <!-- Quiz info -->
+        <div class="row g-4 mb-4">
+            {% if quiz.dureeMinutes %}
+            <div class="col-sm-6 col-md-4">
+                <div class="d-flex align-items-center">
+                    <div class="icon-lg bg-orange bg-opacity-10 text-orange rounded-3">
+                        <i class="fas fa-clock fa-fw"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="mb-0">Durée</h6>
+                        <p class="mb-0 small">{{ quiz.dureeMinutes }} minutes</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if quiz.typeQuiz %}
+            <div class="col-sm-6 col-md-4">
+                <div class="d-flex align-items-center">
+                    <div class="icon-lg bg-info bg-opacity-10 text-info rounded-3">
+                        <i class="fas fa-tag fa-fw"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="mb-0">Type</h6>
+                        <p class="mb-0 small">{{ quiz.typeQuiz }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if quiz.nombreTentativesAutorisees %}
+            <div class="col-sm-6 col-md-4">
+                <div class="d-flex align-items-center">
+                    <div class="icon-lg bg-success bg-opacity-10 text-success rounded-3">
+                        <i class="fas fa-redo fa-fw"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="mb-0">Tentatives</h6>
+                        <p class="mb-0 small">{{ quiz.nombreTentativesAutorisees }} autorisées</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Instructions -->
+        {% if quiz.instructions %}
+        <div class="alert alert-info">
+            <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Instructions</h6>
+            <p class="mb-0">{{ quiz.instructions }}</p>
+        </div>
+        {% endif %}
+        
+        <!-- Questions preview -->
+        {% if quiz.questions is defined and quiz.questions|length > 0 %}
+        <div class="card bg-light mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Aperçu des questions ({{ quiz.questions|length }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for question in quiz.questions %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                        <div>
+                            <h6 class="mb-0">
+                                Question {{ loop.index }} : {{ question.texte|slice(0, 80) }}{% if question.texte|length > 80 %}...{% endif %}
+                            </h6>
+                            <small class="text-muted">
+                                <i class="fas fa-tag me-1"></i>{{ question.typeQuestion|upper }}
+                                {% if question.points %}
+                                | <i class="fas fa-star me-1"></i>{{ question.points }} points
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Action buttons -->
+        <div class="text-center">
+            <a href="{{ path('quiz_index') }}" class="btn btn-secondary btn-lg me-2">
+                <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+            </a>
+            <a href="{{ path('quiz_show_complet', {id: quiz.id}) }}" class="btn btn-success btn-lg">
+                <i class="bi bi-play-circle me-2"></i>Commencer le Quiz
+            </a>
+        </div>
+    </div>
+</div>
+<!-- Quiz details END -->
+
+<!-- Statistics -->
+{% if stats is defined and stats is not empty %}
+<div class="card border mt-4">
+    <div class="card-header border-bottom">
+        <h5 class="card-title mb-0">Statistiques</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h4 class="mb-0 text-primary">{{ stats.totalQuestions|default(0) }}</h4>
+                    <p class="mb-0">Questions</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h4 class="mb-0 text-success">{{ stats.averageScore|default(0) }}%</h4>
+                    <p class="mb-0">Score moyen</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h4 class="mb-0 text-info">{{ stats.totalAttempts|default(0) }}</h4>
+                    <p class="mb-0">Tentatives</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
