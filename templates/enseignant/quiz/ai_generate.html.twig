@@ -1,0 +1,187 @@
+{% extends 'enseignant/prof_base.html.twig' %}
+
+{% block main_content %}
+<!-- Card START -->
+<div class="card border bg-transparent rounded-3">
+    <!-- Card header START -->
+    <div class="card-header bg-transparent border-bottom px-3">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-2">
+                <img src="{{ asset('assets/images/courses/4by3/01.jpg') }}" class="rounded-2" alt="Quiz IA">
+            </div>
+            <div class="col-md-10">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        🤖 Générer un Quiz avec l'IA
+                    </h3>
+                    <a href="{{ path('teacher_quiz_index') }}" class="btn btn-sm btn-secondary mb-0">
+                        <i class="bi bi-arrow-left me-1"></i>Mes Quiz
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Card header END -->
+
+    <!-- Card body START -->
+    <div class="card-body p-4">
+
+        <!-- Flash messages -->
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+
+        {% if error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endif %}
+
+        <!-- Formulaire -->
+        <div class="card bg-light border mb-4">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="bi bi-magic me-2"></i>Paramètres de génération</h5>
+                <form method="post" enctype="multipart/form-data">
+
+                    <!-- Mode -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mode de génération</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="mode" value="subject" id="modeSubject" checked>
+                            <label class="form-check-label" for="modeSubject">📝 Par sujet</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="mode" value="document" id="modeDoc">
+                            <label class="form-check-label" for="modeDoc">📄 Par document de cours (.txt)</label>
+                        </div>
+                    </div>
+
+                    <!-- Par sujet -->
+                    <div id="subjectSection">
+                        <div class="mb-3">
+                            <label class="form-label">Sujet du quiz</label>
+                            <input type="text" name="subject" class="form-control"
+                                   placeholder="Ex: La photosynthèse, Les bases de Python...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Niveau</label>
+                            <select name="level" class="form-select">
+                                <option value="débutant">Débutant</option>
+                                <option value="intermédiaire" selected>Intermédiaire</option>
+                                <option value="avancé">Avancé</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Par document -->
+                    <div id="documentSection" style="display:none">
+                        <div class="mb-3">
+                            <label class="form-label">Uploader un document (.txt)</label>
+                            <input type="file" name="document" class="form-control" accept=".txt">
+                        </div>
+                    </div>
+
+                    <!-- Nombre de questions -->
+                    <div class="mb-3">
+                        <label class="form-label">Nombre de questions</label>
+                        <select name="nb_questions" class="form-select">
+                            <option value="5">5 questions</option>
+                            <option value="10">10 questions</option>
+                            <option value="15">15 questions</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-stars me-1"></i>Générer le Quiz
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Résultat -->
+        {% if quiz %}
+
+        {% if savedQuiz %}
+            <div class="alert alert-success alert-dismissible fade show d-flex justify-content-between align-items-center">
+                <span>✅ Quiz <strong>{{ quiz.title }}</strong> sauvegardé et disponible pour vos étudiants !</span>
+                <a href="{{ path('quiz_manage_questions', {id: savedQuiz.id}) }}" class="btn btn-sm btn-success ms-3">
+                    <i class="bi bi-list-check me-1"></i>Gérer les questions
+                </a>
+            </div>
+        {% endif %}
+
+        <h5 class="mb-3"><i class="bi bi-eye me-2"></i>Aperçu : {{ quiz.title }}</h5>
+
+        <!-- Accordion questions -->
+        <div class="accordion accordion-icon accordion-bg-light" id="accordionQuizAI">
+            {% for i, q in quiz.questions %}
+            <div class="accordion-item mb-3">
+                <h6 class="accordion-header" id="headingQ{{ i }}">
+                    <button class="accordion-button rounded collapsed" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseQ{{ i }}"
+                            aria-expanded="false">
+                        <span class="text-secondary fw-bold me-3">{{ '%02d'|format(i + 1) }}</span>
+                        <span class="fw-bold">{{ q.question }}</span>
+                    </button>
+                </h6>
+                <div id="collapseQ{{ i }}" class="accordion-collapse collapse"
+                     data-bs-parent="#accordionQuizAI">
+                    <div class="accordion-body mt-2">
+                        <ul class="list-group mb-2">
+                            {% for option in q.options %}
+                            {# APRÈS #}
+<li class="list-group-item {% if option|first == q.correct %}list-group-item-success{% endif %}">
+    {{ option }}
+    {% if option|first == q.correct %}
+        <span class="badge bg-success float-end">✅ Bonne réponse</span>
+    {% endif %}
+</li>
+                            {% endfor %}
+                        </ul>
+                        {% if q.explanation %}
+                        <p class="text-muted mb-0"><small>💡 <em>{{ q.explanation }}</em></small></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if savedQuiz %}
+        <div class="d-flex gap-2 mt-4">
+            <a href="{{ path('quiz_manage_questions', {id: savedQuiz.id}) }}" class="btn btn-primary">
+                <i class="bi bi-list-check me-1"></i>Gérer les questions
+            </a>
+            <a href="{{ path('teacher_quiz_index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Retour à mes quiz
+            </a>
+        </div>
+        {% endif %}
+
+        {% endif %}
+
+    </div>
+    <!-- Card body END -->
+</div>
+<!-- Card END -->
+
+<script>
+document.querySelectorAll('input[name="mode"]').forEach(r => {
+    r.addEventListener('change', function () {
+        document.getElementById('subjectSection').style.display  = this.value === 'subject'  ? '' : 'none';
+        document.getElementById('documentSection').style.display = this.value === 'document' ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

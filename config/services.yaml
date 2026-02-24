@@ -1,0 +1,51 @@
+parameters:
+    google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
+    google_recaptcha_secret: '%env(GOOGLE_RECAPTCHA_SECRET)%'
+    groq_api_key: '%env(GROQ_API_KEY)%'
+    app.hf_api_key: '%env(string:HF_API_KEY)%'
+    app.hf_model: '%env(default::string:HF_MODEL)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler:
+        arguments:
+            - 'mysql:host=127.0.0.1;port=3307;dbname=gestion_utilisateur;charset=utf8mb4'
+            - {
+                db_table: 'sessions',
+                db_id_col: 'sess_id',
+                db_data_col: 'sess_data',
+                db_lifetime_col: 'sess_lifetime',
+                db_time_col: 'sess_time',
+                db_username: 'root',
+                db_password: ''
+            }
+        public: true
+
+    session.handler.pdo:
+        alias: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
+
+    App\Service\GroqChatbotService:
+        arguments:
+            $groqApiKey: '%env(GROQ_API_KEY)%'
+
+    App\Service\GroqService:
+        arguments:
+            $apiKey: '%env(GROQ_API_KEY1)%'
+
+    App\Service\HuggingFaceCourseAssistantService:
+        arguments:
+            $apiKey: '%app.hf_api_key%'
+            $model: '%app.hf_model%'
+
+    Symfony\Contracts\HttpClient\HttpClientInterface:
+        alias: http_client
