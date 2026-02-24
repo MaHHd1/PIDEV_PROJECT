@@ -1,0 +1,19 @@
+vich_uploader:
+    db_driver: orm
+
+    mappings:
+        forum_image:
+            uri_prefix: /uploads/forum/images
+            upload_destination: '%kernel.project_dir%/public/uploads/forum/images'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            delete_on_remove: true
+            delete_on_update: true
+            inject_on_load: false
+
+        forum_attachment:
+            uri_prefix: /uploads/forum/attachments
+            upload_destination: '%kernel.project_dir%/public/uploads/forum/attachments'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            delete_on_remove: true
+            delete_on_update: true
+            inject_on_load: false
