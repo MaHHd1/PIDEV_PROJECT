@@ -35,7 +35,12 @@ NovaLearn is a web platform for managing courses, evaluations, quizzes, submissi
 - Unit tests for service layer in `tests/Service`
 
 ## Contributors
-- MaHHd1 and project team members
+- Mahdi lakhoua
+- feriel kouka
+- mohamed aziz maghraoui
+- mohamed yacin soukeh
+- ayoub gtari
+- ahmed jribi
 
 ## Academic Context
 Developed at **Esprit School of Engineering - Tunisia**  
